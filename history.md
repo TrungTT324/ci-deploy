@@ -75,3 +75,12 @@ Dưới đây là danh sách các yêu cầu (prompts) bạn đã nhập trong p
 
 17. **Lưu lịch sử yêu cầu**
     > tạo file history.md ghi lại các prompt nãy giờ đã nhập
+
+18. **Sửa đổi hằng số urlPath cục bộ**
+    > fix lại urlPath là constant không phải từ json
+
+19. **Tạo nhánh dev trên GitHub**
+    > tạo nhánh dev github và push code
+
+20. **Chuyển sang nhánh dev và sửa lỗi WebView không load được trang**
+    > chuyển sang làm việc trên nhánh dev, fix lỗi webview không load được
