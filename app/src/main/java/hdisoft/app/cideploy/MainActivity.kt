@@ -19,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
@@ -26,7 +27,9 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
+import java.net.NetworkInterface
 import java.net.URL
+import java.util.Collections
 
 class MainActivity : Activity() {
 
@@ -34,6 +37,10 @@ class MainActivity : Activity() {
     private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var downloadJob: Job? = null
     private lateinit var webView: WebView
+    
+    private val PREFS_NAME = "CI_Deploy_Prefs"
+    private val KEY_HOST_IP = "host_ip"
+    private var progressDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,20 +82,213 @@ class MainActivity : Activity() {
             }
         }
 
-        webView.loadUrl("http://172.16.100.26:8080")
-
-        // Check for updates
-        checkForUpdates()
+        // Start host discovery flow
+        initHostDiscovery()
     }
 
-    private fun checkForUpdates() {
+    private fun initHostDiscovery() {
+        mainScope.launch {
+            val savedHost = getSavedHost()
+            if (savedHost != null) {
+                showLoading("Checking saved host: $savedHost...")
+                val works = withContext(Dispatchers.IO) {
+                    checkHost(savedHost)
+                }
+                dismissLoading()
+                if (works) {
+                    loadHost(savedHost)
+                    return@launch
+                } else {
+                    Toast.makeText(this@MainActivity, "Saved host unavailable. Scanning network...", Toast.LENGTH_SHORT).show()
+                }
+            }
+            
+            // Scan LAN
+            discoverAndLoadHost()
+        }
+    }
+
+    private fun discoverAndLoadHost() {
+        mainScope.launch {
+            showLoading("Scanning local network (port 8080)...")
+            val subnet = getLocalSubnet()
+            if (subnet == null) {
+                dismissLoading()
+                showNoHostDialog("Cannot determine local IP subnet. Please connect to a Wi-Fi network.")
+                return@launch
+            }
+
+            val discovered = scanLan(subnet)
+            dismissLoading()
+
+            if (discovered != null) {
+                saveHost(discovered)
+                loadHost(discovered)
+                Toast.makeText(this@MainActivity, "Connected to: $discovered", Toast.LENGTH_LONG).show()
+            } else {
+                showNoHostDialog("No host found on port 8080 in the local network.")
+            }
+        }
+    }
+
+    private fun loadHost(host: String) {
+        webView.loadUrl("http://$host:8080")
+        checkForUpdates(host)
+    }
+
+    private fun showNoHostDialog(errorMessage: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Host Not Found")
+            .setMessage("$errorMessage\n\nMake sure the server is running on port 8080 and your phone is on the same local network.")
+            .setCancelable(false)
+            .setNegativeButton("Exit") { _, _ -> finish() }
+            .setPositiveButton("Retry") { _, _ ->
+                discoverAndLoadHost()
+            }
+            .show()
+    }
+
+    private fun getSavedHost(): String? {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        return prefs.getString(KEY_HOST_IP, null)
+    }
+
+    private fun saveHost(ip: String) {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        prefs.edit().putString(KEY_HOST_IP, ip).apply()
+    }
+
+    private fun showLoading(message: String) {
+        dismissLoading()
+        val padding = 50
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(padding, padding, padding, padding)
+        }
+        val textView = TextView(this).apply {
+            text = message
+            textSize = 16f
+        }
+        val progressBar = ProgressBar(this).apply {
+            isIndeterminate = true
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 30, 0, 0)
+                gravity = android.view.Gravity.CENTER
+            }
+        }
+        layout.addView(textView)
+        layout.addView(progressBar)
+
+        progressDialog = AlertDialog.Builder(this)
+            .setView(layout)
+            .setCancelable(false)
+            .create()
+        progressDialog?.show()
+    }
+
+    private fun dismissLoading() {
+        progressDialog?.dismiss()
+        progressDialog = null
+    }
+
+    private fun getLocalSubnet(): String? {
+        val localIp = getLocalIpAddress() ?: return null
+        val lastDotIndex = localIp.lastIndexOf('.')
+        if (lastDotIndex == -1) return null
+        return localIp.substring(0, lastDotIndex + 1)
+    }
+
+    private fun getLocalIpAddress(): String? {
+        try {
+            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+            for (networkInterface in interfaces) {
+                val addresses = Collections.list(networkInterface.inetAddresses)
+                for (address in addresses) {
+                    if (!address.isLoopbackAddress) {
+                        val ip = address.hostAddress ?: continue
+                        if (ip.indexOf(':') < 0) { // IPv4 check
+                            if (ip.startsWith("192.168.") || ip.startsWith("172.16.") || 
+                                ip.startsWith("172.31.") || ip.startsWith("10.")) {
+                                return ip
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        return null
+    }
+
+    private suspend fun scanLan(subnet: String): String? = coroutineScope {
+        val channel = Channel<String>(Channel.UNLIMITED)
+        val jobs = (1..254).map { i ->
+            launch(Dispatchers.IO) {
+                val ip = "$subnet$i"
+                if (checkHost(ip)) {
+                    channel.trySend(ip)
+                }
+            }
+        }
+
+        val tracker = launch {
+            jobs.forEach { it.join() }
+            channel.close()
+        }
+
+        var foundIp: String? = null
+        try {
+            for (ip in channel) {
+                foundIp = ip
+                break
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            jobs.forEach { it.cancel() }
+            tracker.cancel()
+        }
+
+        return@coroutineScope foundIp
+    }
+
+    private fun checkHost(ip: String): Boolean {
+        var connection: HttpURLConnection? = null
+        try {
+            val url = URL("http://$ip:8080/apps/ci-deploy/ci-deploy-version.json")
+            connection = url.openConnection() as HttpURLConnection
+            connection.connectTimeout = 1200
+            connection.readTimeout = 1200
+            connection.connect()
+
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                val stream = connection.inputStream
+                val reader = BufferedReader(InputStreamReader(stream, "UTF-8"))
+                val response = reader.readLine()
+                if (response != null && response.contains("CI-Deploy")) {
+                    return true
+                }
+            }
+        } catch (e: Exception) {
+            // ignore connection errors
+        } finally {
+            connection?.disconnect()
+        }
+        return false
+    }
+
+    private fun checkForUpdates(host: String) {
         mainScope.launch {
             try {
                 val jsonString = withContext(Dispatchers.IO) {
                     var connection: HttpURLConnection? = null
                     var reader: BufferedReader? = null
                     try {
-                        val url = URL("http://172.16.100.26:8080/apps/ci-deploy/ci-deploy-version.json")
+                        val url = URL("http://$host:8080/apps/ci-deploy/ci-deploy-version.json")
                         connection = url.openConnection() as HttpURLConnection
                         connection.connectTimeout = 5000
                         connection.readTimeout = 5000
@@ -122,7 +322,7 @@ class MainActivity : Activity() {
                     val downloadUrl = jsonObject.optString("url", "")
 
                     if (remoteBuildNo > currentBuildNo) {
-                        showUpgradeDialog(remoteVersion, buildNote, downloadUrl)
+                        showUpgradeDialog(remoteVersion, buildNote, downloadUrl, host)
                     }
                 }
             } catch (e: Exception) {
@@ -131,14 +331,25 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun showUpgradeDialog(version: String, note: String, downloadUrl: String) {
+    private fun showUpgradeDialog(version: String, note: String, downloadUrl: String, host: String) {
+        // Dynamically replace host in download URL to match discovered host IP
+        var finalDownloadUrl = downloadUrl
+        try {
+            val originalUri = Uri.parse(downloadUrl)
+            if (originalUri.host != null) {
+                finalDownloadUrl = downloadUrl.replace(originalUri.host!!, host)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         AlertDialog.Builder(this)
             .setTitle("New Upgrade")
             .setMessage("Version: $version\n\nWhat's new:\n$note")
             .setCancelable(false)
             .setNegativeButton("No", null)
             .setPositiveButton("Yes") { _, _ ->
-                startDownload(downloadUrl)
+                startDownload(finalDownloadUrl)
             }
             .show()
     }
