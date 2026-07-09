@@ -19,27 +19,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build APK (Debug)
-        run: flutter build apk --debug
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
 
       - name: Rename APK
         run: |
-          mv build/app/outputs/flutter-apk/app-debug.apk build/app/outputs/flutter-apk/CI-Deploy_debug.apk
+          mkdir -p app/build/outputs/apk/release-pkg
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release-pkg/CI-Deploy_debug.apk
 
       - name: Create Release and Upload Asset
         env:
@@ -58,7 +54,7 @@ jobs:
           echo "Creating release $RELEASE_NAME with tag $TAG_NAME"
           
           gh release create "$TAG_NAME" \
-            build/app/outputs/flutter-apk/CI-Deploy_debug.apk \
+            app/build/outputs/apk/release-pkg/CI-Deploy_debug.apk \
             --title "$RELEASE_NAME" \
-            --notes "Automated debug build for CI-Deploy. Built from commit $GITHUB_SHA." \
+            --notes "Automated native Android debug build for CI-Deploy. Built from commit $GITHUB_SHA." \
             --clobber
