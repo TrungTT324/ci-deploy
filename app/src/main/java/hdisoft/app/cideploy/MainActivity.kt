@@ -20,6 +20,8 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
@@ -226,11 +228,15 @@ class MainActivity : Activity() {
 
     private suspend fun scanLan(subnet: String): String? = coroutineScope {
         val channel = Channel<String>(Channel.UNLIMITED)
+        val semaphore = Semaphore(40) // limit to 40 concurrent scans to prevent socket congestion
+        
         val jobs = (1..254).map { i ->
             launch(Dispatchers.IO) {
-                val ip = "$subnet$i"
-                if (checkHost(ip)) {
-                    channel.trySend(ip)
+                semaphore.withPermit {
+                    val ip = "$subnet$i"
+                    if (checkHost(ip)) {
+                        channel.trySend(ip)
+                    }
                 }
             }
         }
@@ -261,15 +267,20 @@ class MainActivity : Activity() {
         try {
             val url = URL("http://$ip:8080/apps/ci-deploy/ci-deploy-version.json")
             connection = url.openConnection() as HttpURLConnection
-            connection.connectTimeout = 1200
-            connection.readTimeout = 1200
+            connection.connectTimeout = 2000 // 2 seconds timeout
+            connection.readTimeout = 2000
             connection.connect()
 
             if (connection.responseCode == HttpURLConnection.HTTP_OK) {
                 val stream = connection.inputStream
                 val reader = BufferedReader(InputStreamReader(stream, "UTF-8"))
-                val response = reader.readLine()
-                if (response != null && response.contains("CI-Deploy")) {
+                val buffer = StringBuilder()
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    buffer.append(line)
+                }
+                val response = buffer.toString()
+                if (response.contains("CI-Deploy")) {
                     return true
                 }
             }
