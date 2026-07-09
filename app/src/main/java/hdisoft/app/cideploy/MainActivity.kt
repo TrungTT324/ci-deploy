@@ -30,7 +30,7 @@ import java.net.URL
 
 class MainActivity : Activity() {
 
-    private val currentBuildNo = 202607090300L
+    private val currentBuildNo = BuildConfig.BUILD_NO
     private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var downloadJob: Job? = null
     private lateinit var webView: WebView

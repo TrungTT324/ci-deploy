@@ -1,7 +1,18 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+fun generateBuildNo(): Long {
+    val formattedDate = SimpleDateFormat("yyyyMMddHHmm").format(Date())
+    return formattedDate.toLong()
+}
+
+val computedBuildNo = generateBuildNo()
+println("CI-DEPLOY BUILD_NO GENERATED: $computedBuildNo")
 
 android {
     namespace = "hdisoft.app.cideploy"
@@ -13,6 +24,8 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
+
+        buildConfigField("long", "BUILD_NO", "${computedBuildNo}L")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,6 +45,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
