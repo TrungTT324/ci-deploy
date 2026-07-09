@@ -46,6 +46,7 @@ class MainActivity : Activity() {
     private val urlPath = "ci-deploy"
     private var currentHost: String? = null
     private var isUpgradeDialogShowing = false
+    private val FALLBACK_IPS = listOf("172.16.100.26", "10.0.2.2")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,9 +57,27 @@ class MainActivity : Activity() {
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
+            databaseEnabled = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
-        webView.webViewClient = WebViewClient()
+        
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                val url = request?.url?.toString()
+                if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+                    view?.loadUrl(url)
+                    return true
+                }
+                return false
+            }
+            
+            override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+                super.onReceivedError(view, errorCode, description, failingUrl)
+                Toast.makeText(this@MainActivity, "Load error: $description", Toast.LENGTH_LONG).show()
+            }
+        }
 
         // Handle file downloads
         webView.setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
@@ -242,10 +261,17 @@ class MainActivity : Activity() {
         val channel = Channel<String>(Channel.UNLIMITED)
         val semaphore = Semaphore(40) // limit to 40 concurrent scans to prevent socket congestion
         
-        val jobs = (1..254).map { i ->
+        // Combine subnet IPs and fallback IPs
+        val ipsToScan = (1..254).map { "$subnet$it" }.toMutableList()
+        for (fallback in FALLBACK_IPS) {
+            if (!ipsToScan.contains(fallback)) {
+                ipsToScan.add(fallback)
+            }
+        }
+        
+        val jobs = ipsToScan.map { ip ->
             launch(Dispatchers.IO) {
                 semaphore.withPermit {
-                    val ip = "$subnet$i"
                     if (checkHost(ip)) {
                         channel.trySend(ip)
                     }
