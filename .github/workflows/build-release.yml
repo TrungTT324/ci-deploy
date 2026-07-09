@@ -1,0 +1,64 @@
+name: Build and Release CI-Deploy APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK (Debug)
+        run: flutter build apk --debug
+
+      - name: Rename APK
+        run: |
+          mv build/app/outputs/flutter-apk/app-debug.apk build/app/outputs/flutter-apk/CI-Deploy_debug.apk
+
+      - name: Create Release and Upload Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Generate tag and release name based on date and commit SHA
+          TAG_NAME="v$(date +'%Y.%m.%d')-${GITHUB_SHA::7}"
+          RELEASE_NAME="CI-Deploy Debug Release ($(date +'%Y-%m-%d'))"
+          
+          # If triggered by tag push, use the pushed tag
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+            RELEASE_NAME="CI-Deploy Debug Release $TAG_NAME"
+          fi
+          
+          echo "Creating release $RELEASE_NAME with tag $TAG_NAME"
+          
+          gh release create "$TAG_NAME" \
+            build/app/outputs/flutter-apk/CI-Deploy_debug.apk \
+            --title "$RELEASE_NAME" \
+            --notes "Automated debug build for CI-Deploy. Built from commit $GITHUB_SHA." \
+            --clobber
