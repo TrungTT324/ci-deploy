@@ -56,5 +56,4 @@ jobs:
           gh release create "$TAG_NAME" \
             app/build/outputs/apk/release-pkg/CI-Deploy_debug.apk \
             --title "$RELEASE_NAME" \
-            --notes "Automated native Android debug build for CI-Deploy. Built from commit $GITHUB_SHA." \
-            --clobber
+            --notes "Automated native Android debug build for CI-Deploy. Built from commit $GITHUB_SHA."
