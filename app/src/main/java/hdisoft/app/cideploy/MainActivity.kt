@@ -43,7 +43,7 @@ class MainActivity : Activity() {
     private val PREFS_NAME = "CI_Deploy_Prefs"
     private val KEY_HOST_IP = "host_ip"
     private var progressDialog: AlertDialog? = null
-    private var urlPath = "ci-deploy"
+    private val urlPath = "ci-deploy"
     private var currentHost: String? = null
     private var isUpgradeDialogShowing = false
 
@@ -293,8 +293,6 @@ class MainActivity : Activity() {
                 }
                 val response = buffer.toString()
                 if (response.contains("CI-Deploy")) {
-                    val jsonObject = JSONObject(response)
-                    urlPath = jsonObject.optString("urlPath", "ci-deploy")
                     return true
                 }
             }
@@ -341,7 +339,6 @@ class MainActivity : Activity() {
 
                 if (jsonString != null) {
                     val jsonObject = JSONObject(jsonString)
-                    urlPath = jsonObject.optString("urlPath", "ci-deploy")
                     val remoteBuildNo = jsonObject.optLong("buildNo", 0)
                     val remoteVersion = jsonObject.optString("version", "1.0.0")
                     val buildNote = jsonObject.optString("buildNote", "")
