@@ -1,54 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout 
+<LinearLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="horizontal"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <!-- Screen Content (including Toolbar and WebView) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <!-- Toolbar (acts as Action Bar) -->
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="CI Deployment" />
-
-        <!-- WebView container -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <android.webkit.WebView
-                android:id="@+id/webView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </FrameLayout>
-
-    </LinearLayout>
-
-    <!-- Custom Navigation Drawer -->
+    <!-- Left Column: Fixed Menu (Permanent Navigation Drawer) -->
     <LinearLayout
         android:id="@+id/navigationDrawer"
         android:layout_width="280dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
         android:background="?android:attr/windowBackground"
-        android:orientation="vertical"
-        android:clickable="true"
-        android:focusable="true">
+        android:elevation="4dp"
+        android:orientation="vertical">
 
         <!-- Drawer Header -->
         <LinearLayout
@@ -158,4 +126,41 @@
 
     </LinearLayout>
 
-</androidx.drawerlayout.widget.DrawerLayout>
+    <!-- Divider line between menu and content -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="?android:attr/listDivider" />
+
+    <!-- Right Column: Content Area (Toolbar & WebView) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Toolbar (acts as Action Bar) -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="CI Deployment" />
+
+        <!-- WebView container -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <android.webkit.WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
