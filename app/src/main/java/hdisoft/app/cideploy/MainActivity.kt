@@ -44,6 +44,8 @@ class MainActivity : Activity() {
     private val KEY_HOST_IP = "host_ip"
     private var progressDialog: AlertDialog? = null
     private var urlPath = "ci-deploy"
+    private var currentHost: String? = null
+    private var isUpgradeDialogShowing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,9 +137,17 @@ class MainActivity : Activity() {
     }
 
     private fun loadHost(host: String) {
+        currentHost = host
         val finalUrl = "http://$host:8080/$urlPath"
         webView.loadUrl(finalUrl)
         checkForUpdates(host)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        currentHost?.let { host ->
+            checkForUpdates(host)
+        }
     }
 
     private fun showNoHostDialog(errorMessage: String) {
@@ -348,6 +358,9 @@ class MainActivity : Activity() {
     }
 
     private fun showUpgradeDialog(version: String, note: String, downloadUrl: String, host: String) {
+        if (isUpgradeDialogShowing) return
+        isUpgradeDialogShowing = true
+
         // Dynamically replace host in download URL to match discovered host IP
         var finalDownloadUrl = downloadUrl
         try {
@@ -363,8 +376,13 @@ class MainActivity : Activity() {
             .setTitle("New Upgrade")
             .setMessage("Version: $version\n\nWhat's new:\n$note")
             .setCancelable(false)
-            .setNegativeButton("No", null)
-            .setPositiveButton("Yes") { _, _ ->
+            .setNegativeButton("No") { dialog, _ ->
+                isUpgradeDialogShowing = false
+                dialog.dismiss()
+            }
+            .setPositiveButton("Yes") { dialog, _ ->
+                isUpgradeDialogShowing = false
+                dialog.dismiss()
                 startDownload(finalDownloadUrl)
             }
             .show()
