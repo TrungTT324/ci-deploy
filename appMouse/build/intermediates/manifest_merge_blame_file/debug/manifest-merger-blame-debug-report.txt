@@ -1,0 +1,195 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="hdisoft.app.mouse"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-feature
+11-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:4:5-87
+12        android:name="android.hardware.bluetooth"
+12-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:4:19-60
+13        android:required="true" />
+13-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:4:61-84
+14
+15    <!-- Legacy Bluetooth permissions for pre-Android 12 devices. -->
+16    <uses-permission
+16-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:7:5-95
+17        android:name="android.permission.BLUETOOTH"
+17-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:7:22-65
+18        android:maxSdkVersion="30" />
+18-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:7:66-92
+19    <uses-permission
+19-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:8:5-101
+20        android:name="android.permission.BLUETOOTH_ADMIN"
+20-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:8:22-71
+21        android:maxSdkVersion="30" />
+21-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:8:72-98
+22
+23    <!--
+24         Android 12+ runtime Bluetooth permissions. BLUETOOTH_SCAN is required
+25         just to read the adapter's current scan/discoverable mode (checked
+26         before asking to become discoverable) — neverForLocation because we
+27         never use it to derive device position, only our own adapter state.
+28    -->
+29    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+29-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:14:5-76
+29-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:14:22-73
+30    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+30-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:15:5-78
+30-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:15:22-75
+31    <uses-permission
+31-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:16:5-18:58
+32        android:name="android.permission.BLUETOOTH_SCAN"
+32-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:17:9-57
+33        android:usesPermissionFlags="neverForLocation" />
+33-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:18:9-55
+34
+35    <!-- OTA self-update: download + prompt to install a newer APK. -->
+36    <uses-permission android:name="android.permission.INTERNET" />
+36-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:21:5-67
+36-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:21:22-64
+37    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+37-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:22:5-83
+37-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:22:22-80
+38
+39    <permission
+39-->[androidx.core:core:1.12.0] /Users/trungtruong/.gradle/caches/8.14/transforms/7a0cb0a5476081bad58c057f6a0d04fa/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+40        android:name="hdisoft.app.mouse.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+40-->[androidx.core:core:1.12.0] /Users/trungtruong/.gradle/caches/8.14/transforms/7a0cb0a5476081bad58c057f6a0d04fa/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+41        android:protectionLevel="signature" />
+41-->[androidx.core:core:1.12.0] /Users/trungtruong/.gradle/caches/8.14/transforms/7a0cb0a5476081bad58c057f6a0d04fa/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+42
+43    <uses-permission android:name="hdisoft.app.mouse.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+43-->[androidx.core:core:1.12.0] /Users/trungtruong/.gradle/caches/8.14/transforms/7a0cb0a5476081bad58c057f6a0d04fa/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+43-->[androidx.core:core:1.12.0] /Users/trungtruong/.gradle/caches/8.14/transforms/7a0cb0a5476081bad58c057f6a0d04fa/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+44
+45    <application
+45-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:24:5-54:19
+46        android:allowBackup="true"
+46-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:25:9-35
+47        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+47-->[androidx.core:core:1.12.0] /Users/trungtruong/.gradle/caches/8.14/transforms/7a0cb0a5476081bad58c057f6a0d04fa/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+48        android:debuggable="true"
+49        android:extractNativeLibs="true"
+50        android:icon="@mipmap/ic_launcher"
+50-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:26:9-43
+51        android:label="@string/app_name"
+51-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:27:9-41
+52        android:roundIcon="@mipmap/ic_launcher"
+52-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:28:9-48
+53        android:supportsRtl="true"
+53-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:29:9-35
+54        android:theme="@style/Theme.AppMouse"
+54-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:30:9-46
+55        android:usesCleartextTraffic="true" >
+55-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:31:9-44
+56        <activity
+56-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:33:9-42:20
+57            android:name="hdisoft.app.mouse.MainActivity"
+57-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:34:13-41
+58            android:configChanges="keyboardHidden|orientation|screenSize"
+58-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:37:13-74
+59            android:exported="true"
+59-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:35:13-36
+60            android:screenOrientation="portrait" >
+60-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:36:13-49
+61            <intent-filter>
+61-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:38:13-41:29
+62                <action android:name="android.intent.action.MAIN" />
+62-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:39:17-69
+62-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:39:25-66
+63
+64                <category android:name="android.intent.category.LAUNCHER" />
+64-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:40:17-77
+64-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:40:27-74
+65            </intent-filter>
+66        </activity>
+67
+68        <provider
+69            android:name="androidx.core.content.FileProvider"
+69-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:45:13-62
+70            android:authorities="hdisoft.app.mouse.fileprovider"
+70-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:46:13-64
+71            android:exported="false"
+71-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:47:13-37
+72            android:grantUriPermissions="true" >
+72-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:48:13-47
+73            <meta-data
+73-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:49:13-51:54
+74                android:name="android.support.FILE_PROVIDER_PATHS"
+74-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:50:17-67
+75                android:resource="@xml/file_paths" />
+75-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/appMouse/src/main/AndroidManifest.xml:51:17-51
+76        </provider>
+77        <provider
+77-->[androidx.emoji2:emoji2:1.2.0] /Users/trungtruong/.gradle/caches/8.14/transforms/4faf325dae03ec8281f5a0639524db8a/transformed/emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+78            android:name="androidx.startup.InitializationProvider"
+78-->[androidx.emoji2:emoji2:1.2.0] /Users/trungtruong/.gradle/caches/8.14/transforms/4faf325dae03ec8281f5a0639524db8a/transformed/emoji2-1.2.0/AndroidManifest.xml:25:13-67
+79            android:authorities="hdisoft.app.mouse.androidx-startup"
+79-->[androidx.emoji2:emoji2:1.2.0] /Users/trungtruong/.gradle/caches/8.14/transforms/4faf325dae03ec8281f5a0639524db8a/transformed/emoji2-1.2.0/AndroidManifest.xml:26:13-68
+80            android:exported="false" >
+80-->[androidx.emoji2:emoji2:1.2.0] /Users/trungtruong/.gradle/caches/8.14/transforms/4faf325dae03ec8281f5a0639524db8a/transformed/emoji2-1.2.0/AndroidManifest.xml:27:13-37
+81            <meta-data
+81-->[androidx.emoji2:emoji2:1.2.0] /Users/trungtruong/.gradle/caches/8.14/transforms/4faf325dae03ec8281f5a0639524db8a/transformed/emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+82                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+82-->[androidx.emoji2:emoji2:1.2.0] /Users/trungtruong/.gradle/caches/8.14/transforms/4faf325dae03ec8281f5a0639524db8a/transformed/emoji2-1.2.0/AndroidManifest.xml:30:17-75
+83                android:value="androidx.startup" />
+83-->[androidx.emoji2:emoji2:1.2.0] /Users/trungtruong/.gradle/caches/8.14/transforms/4faf325dae03ec8281f5a0639524db8a/transformed/emoji2-1.2.0/AndroidManifest.xml:31:17-49
+84            <meta-data
+84-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/trungtruong/.gradle/caches/8.14/transforms/87a71545db8bcdccc637863bad5d5908/transformed/lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+85                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+85-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/trungtruong/.gradle/caches/8.14/transforms/87a71545db8bcdccc637863bad5d5908/transformed/lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+86                android:value="androidx.startup" />
+86-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/trungtruong/.gradle/caches/8.14/transforms/87a71545db8bcdccc637863bad5d5908/transformed/lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+87            <meta-data
+87-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
+88                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+88-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
+89                android:value="androidx.startup" />
+89-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
+90        </provider>
+91
+92        <receiver
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
+93            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+93-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
+94            android:directBootAware="false"
+94-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
+95            android:enabled="true"
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
+96            android:exported="true"
+96-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
+97            android:permission="android.permission.DUMP" >
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
+98            <intent-filter>
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
+99                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+99-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
+99-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
+100            </intent-filter>
+101            <intent-filter>
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
+102                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
+103            </intent-filter>
+104            <intent-filter>
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
+105                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+105-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
+105-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
+106            </intent-filter>
+107            <intent-filter>
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
+108                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+108-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
+108-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/trungtruong/.gradle/caches/8.14/transforms/e2af3b7055aeb91930b577576f7801de/transformed/profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
+109            </intent-filter>
+110        </receiver>
+111    </application>
+112
+113</manifest>

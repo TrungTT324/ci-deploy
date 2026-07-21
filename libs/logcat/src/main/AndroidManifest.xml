@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name="hdisoft.app.logcat.presentation.LogcatActivity"
+            android:exported="false"
+            android:theme="@style/LogcatTheme"
+            android:configChanges="keyboardHidden" />
+
+        <service
+            android:name="hdisoft.app.logcat.presentation.LogStreamService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="This service broadcasts real-time logcat of the app via WebSocket to local network clients or receives logs from local servers for debugging purpose." />
+        </service>
+    </application>
+</manifest>

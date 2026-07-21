@@ -15,3 +15,11 @@ dependencyResolutionManagement {
 
 rootProject.name = "CI-Deploy"
 include(":app")
+include(":libs:appupdate")
+include(":libs:core")
+include(":libs:logcat")
+include(":libs:webserver")
+include(":libs:cidata")
+include(":libs:bluetooth")
+include(":appMouse")
+include(":appQa")

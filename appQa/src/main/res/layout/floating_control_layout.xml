@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/floating_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/floating_bg"
+    android:padding="8dp"
+    android:gravity="center_vertical"
+    android:elevation="8dp">
+
+    <!-- Drag Handle -->
+    <ImageView
+        android:id="@+id/drag_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_drag"
+        android:contentDescription="Drag"
+        android:tint="#888888"
+        android:padding="6dp" />
+
+    <!-- Screenshot -->
+    <ImageButton
+        android:id="@+id/btn_screenshot"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_camera"
+        android:contentDescription="Screenshot"
+        android:tint="#FFFFFF" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:background="#444444"
+        android:layout_marginHorizontal="4dp" />
+
+    <!-- Record -->
+    <ImageButton
+        android:id="@+id/btn_record"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_record_start"
+        android:contentDescription="Record" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:background="#444444"
+        android:layout_marginHorizontal="4dp" />
+
+    <!-- Automation Script -->
+    <Button
+        android:id="@+id/btn_auto"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:text="AUTO"
+        android:textColor="#00E676"
+        android:textStyle="bold"
+        android:textSize="12sp" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:background="#444444"
+        android:layout_marginHorizontal="4dp" />
+
+    <!-- Back Button -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_back"
+        android:contentDescription="Back"
+        android:tint="#FFFFFF" />
+
+    <!-- Home Button -->
+    <ImageButton
+        android:id="@+id/btn_home"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_home"
+        android:contentDescription="Home"
+        android:tint="#FFFFFF" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:background="#444444"
+        android:layout_marginHorizontal="4dp" />
+
+    <!-- Close/Minimize -->
+    <ImageButton
+        android:id="@+id/btn_close"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_close"
+        android:contentDescription="Close"
+        android:tint="#FF3D00" />
+
+</LinearLayout>

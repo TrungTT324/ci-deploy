@@ -1,0 +1,50 @@
+[
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_ic_camera.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/ic_camera.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/xml_accessibility_service_config.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/xml/accessibility_service_config.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_ic_drag.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/ic_drag.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_floating_bg.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/floating_bg.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/layout_activity_main.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/layout/activity_main.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_ic_record_stop.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/ic_record_stop.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_ic_close.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/ic_close.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/layout_floating_control_layout.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/layout/floating_control_layout.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/xml_file_paths.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/xml/file_paths.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_ic_back.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/ic_back.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_ic_home.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/ic_home.xml"
+    },
+    {
+        "merged": "hdisoft.app.qa.appQa-merged_res-36:/drawable_ic_record_start.xml.flat",
+        "source": "hdisoft.app.qa.appQa-main-38:/drawable/ic_record_start.xml"
+    }
+]

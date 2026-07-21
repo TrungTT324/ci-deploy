@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appupdate_close_button">Close</string>
+    <string name="appupdate_dialog_title">Version info</string>
+    <string name="appupdate_flow_accept">Yes</string>
+    <string name="appupdate_flow_cancel_button">Cancel</string>
+    <string name="appupdate_flow_decline">No</string>
+    <string name="appupdate_flow_download_cancelled">Download cancelled.</string>
+    <string name="appupdate_flow_download_completed">Download completed! Press Install to continue.</string>
+    <string name="appupdate_flow_download_error_format">Error: %1$s</string>
+    <string name="appupdate_flow_download_initializing">Initializing download…</string>
+    <string name="appupdate_flow_download_progress_format">Downloading: %1$.1f MB / %2$.1f MB (%3$d%%)</string>
+    <string name="appupdate_flow_download_progress_indeterminate_format">Downloading: %1$.1f MB</string>
+    <string name="appupdate_flow_download_title">Downloading Update</string>
+    <string name="appupdate_flow_install_button">Install</string>
+    <string name="appupdate_flow_later_button">Later</string>
+    <string name="appupdate_flow_manual_install_message_format">Couldn\'t install automatically with root.\n\n%1$s\n\nYou can continue with the system installer.</string>
+    <string name="appupdate_flow_manual_install_title">Install Update</string>
+    <string name="appupdate_flow_new_version_message_format">Version: %1$s\n\nWhat\'s new:\n%2$s</string>
+    <string name="appupdate_flow_new_version_title">New Upgrade</string>
+    <string name="appupdate_flow_ready_message">The APK has been downloaded and verified. Install now?</string>
+    <string name="appupdate_flow_ready_title">Update ready</string>
+    <string name="appupdate_flow_skip_button">Skip</string>
+    <string name="appupdate_flow_update_failed_toast_format">Update failed: %1$s</string>
+    <string name="appupdate_flow_verification_failed_format">Verification failed: %1$s</string>
+    <string name="appupdate_flow_verifying">Verifying downloaded APK…</string>
+    <string name="appupdate_grant_install_permission">Allow installing unknown apps, then tap Install again.</string>
+    <string name="appupdate_install_date_label">Install date: %1$s</string>
+    <string name="appupdate_install_failed_format">Failed to start install: %1$s</string>
+    <string name="appupdate_interval_default">Default (on app open/resume)</string>
+    <string name="appupdate_interval_every_seconds">Every %1$d seconds</string>
+    <string name="appupdate_interval_header">\nUpdate check frequency:</string>
+    <string name="appupdate_last_apk_label">Last downloaded APK: %1$s</string>
+    <string name="appupdate_last_checked_label">Last checked: %1$s</string>
+    <string name="appupdate_last_checked_never">Never checked</string>
+    <string name="appupdate_none_placeholder">None</string>
+    <string name="appupdate_save_button">Save</string>
+    <string name="appupdate_saved_toast">Update check settings saved!</string>
+    <string name="appupdate_source_header">\nUpdate source:</string>
+    <string name="appupdate_source_mode_lan">LAN only (local network)</string>
+    <string name="appupdate_source_mode_public">Public host</string>
+    <string name="appupdate_version_info_format">Version: %1$s\nBuild No: %2$d</string>
+</resources>

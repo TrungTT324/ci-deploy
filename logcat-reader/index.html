@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI-Deploy Logcat Viewer</title>
+<style>
+  :root {
+    --bg: #121212;
+    --bg-panel: #1c1c1e;
+    --bg-input: #2a2a2c;
+    --border: #333336;
+    --text: #e0e0e0;
+    --text-dim: #888888;
+    --accent: #64b5f6;
+    --green: #81c784;
+    --orange: #ffb74d;
+    --red: #ff5252;
+    --grey: #b0bec5;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top connection bar */
+  .connect-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .connect-bar h1 {
+    font-size: 15px;
+    margin: 0 12px 0 0;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .connect-bar input[type=text] {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    min-width: 220px;
+    flex: 1 1 220px;
+  }
+  .connect-bar input[type=text]:focus { border-color: var(--accent); }
+  button {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--accent); color: #0a0a0a; border-color: var(--accent); font-weight: 600; }
+  button.danger { background: var(--red); color: #0a0a0a; border-color: var(--red); font-weight: 600; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--text-dim);
+    flex-shrink: 0;
+  }
+  .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.connecting { background: var(--orange); }
+  .status-dot.error { background: var(--red); }
+  .status-text { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .toolbar input[type=text] {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    flex: 1 1 200px;
+    min-width: 160px;
+  }
+  .toolbar input[type=text]:focus { border-color: var(--accent); }
+  .level-chips { display: flex; gap: 4px; }
+  .chip {
+    padding: 5px 9px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--bg-input);
+    color: var(--text-dim);
+    user-select: none;
+  }
+  .chip.active[data-level="V"] { background: var(--grey); color: #0a0a0a; border-color: var(--grey); }
+  .chip.active[data-level="D"] { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+  .chip.active[data-level="I"] { background: var(--green); color: #0a0a0a; border-color: var(--green); }
+  .chip.active[data-level="W"] { background: var(--orange); color: #0a0a0a; border-color: var(--orange); }
+  .chip.active[data-level="E"] { background: var(--red); color: #0a0a0a; border-color: var(--red); }
+  .toggle-btn.active { border-color: var(--accent); color: var(--accent); }
+  .spacer { flex: 1; }
+  .count-badge { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+
+  /* Log area */
+  #logContainer {
+    flex: 1;
+    overflow-y: auto;
+    background: #0d0d0e;
+    padding: 4px 0;
+  }
+  .log-line {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    padding: 1px 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+  .log-line:hover { background: rgba(255,255,255,0.04); }
+  .lvl-E { color: var(--red); }
+  .lvl-W { color: var(--orange); }
+  .lvl-I { color: var(--green); }
+  .lvl-D { color: var(--accent); }
+  .lvl-V { color: var(--grey); }
+  .lvl-SYS { color: var(--text-dim); font-style: italic; }
+  .lvl-DEFAULT { color: #e0e0e0; }
+  mark { background: #ffd54f; color: #000; border-radius: 2px; }
+
+  #emptyState {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-dim);
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #emptyState .hint { font-size: 12px; opacity: 0.7; max-width: 420px; }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; }
+</style>
+</head>
+<body>
+
+  <div class="connect-bar">
+    <h1>📡 CI-Deploy Logcat</h1>
+    <input type="text" id="wsUrl" placeholder="ws://192.168.1.100:8082" />
+    <button id="btnConnect" class="primary">Connect</button>
+    <button id="btnDisconnect" class="danger" disabled>Disconnect</button>
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-dim);cursor:pointer;">
+      <input type="checkbox" id="autoReconnect" checked style="cursor:pointer;" /> Auto-reconnect
+    </label>
+    <div class="spacer"></div>
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-text" id="statusText">Disconnected</span>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="filterInput" placeholder="Filter logs (text, supports plain substring match)..." />
+    <div class="level-chips" id="levelChips">
+      <div class="chip active" data-level="V">V</div>
+      <div class="chip active" data-level="D">D</div>
+      <div class="chip active" data-level="I">I</div>
+      <div class="chip active" data-level="W">W</div>
+      <div class="chip active" data-level="E">E</div>
+    </div>
+    <button id="btnAutoScroll" class="toggle-btn active">⬇ Auto-scroll</button>
+    <button id="btnPause">⏸ Pause</button>
+    <button id="btnClear">🗑 Clear</button>
+    <button id="btnDownload">⬇ Export</button>
+    <div class="spacer"></div>
+    <span class="count-badge" id="countBadge">0 / 0 lines</span>
+  </div>
+
+  <div id="logContainer">
+    <div id="emptyState">
+      <div>No logs yet</div>
+      <div class="hint">Enter the CI-Deploy app's WebSocket URL above (shown on the app's Logcat screen when in Server mode, e.g. ws://192.168.1.x:8082) and click Connect.</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const MAX_LINES = 5000;
+
+  const els = {
+    wsUrl: document.getElementById('wsUrl'),
+    btnConnect: document.getElementById('btnConnect'),
+    btnDisconnect: document.getElementById('btnDisconnect'),
+    autoReconnect: document.getElementById('autoReconnect'),
+    statusDot: document.getElementById('statusDot'),
+    statusText: document.getElementById('statusText'),
+    filterInput: document.getElementById('filterInput'),
+    levelChips: document.getElementById('levelChips'),
+    btnAutoScroll: document.getElementById('btnAutoScroll'),
+    btnPause: document.getElementById('btnPause'),
+    btnClear: document.getElementById('btnClear'),
+    btnDownload: document.getElementById('btnDownload'),
+    countBadge: document.getElementById('countBadge'),
+    logContainer: document.getElementById('logContainer'),
+    emptyState: document.getElementById('emptyState'),
+  };
+
+  let ws = null;
+  let manualDisconnect = false;
+  let reconnectTimer = null;
+  let isPaused = false;
+  let isAutoScroll = true;
+  let allLogs = []; // { raw, level }
+  let filterText = '';
+  let activeLevels = new Set(['V', 'D', 'I', 'W', 'E']);
+
+  // --- Persist last used URL ---
+  const savedUrl = localStorage.getItem('logcat_ws_url');
+  els.wsUrl.value = savedUrl || 'ws://192.168.1.100:8082';
+
+  // --- Level detection (mirrors Android app's coloring logic) ---
+  function detectLevel(line) {
+    if (line.startsWith('[SYSTEM]')) return 'SYS';
+    if (line.includes(' E/') || line.includes(' E ') || line.includes(' F/') || line.includes(' F ')) return 'E';
+    if (line.includes(' W/') || line.includes(' W ')) return 'W';
+    if (line.includes(' I/') || line.includes(' I ')) return 'I';
+    if (line.includes(' D/') || line.includes(' D ')) return 'D';
+    if (line.includes(' V/') || line.includes(' V ')) return 'V';
+    return 'DEFAULT';
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlight(text, query) {
+    const escaped = escapeHtml(text);
+    if (!query) return escaped;
+    const q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escaped.replace(new RegExp('(' + q + ')', 'ig'), '<mark>$1</mark>');
+  }
+
+  // --- Rendering ---
+  function passesFilter(entry) {
+    if (entry.level !== 'SYS' && !activeLevels.has(entry.level) && entry.level !== 'DEFAULT') return false;
+    if (filterText && !entry.raw.toLowerCase().includes(filterText.toLowerCase())) return false;
+    return true;
+  }
+
+  function updateEmptyState(visibleCount) {
+    els.emptyState.style.display = visibleCount === 0 ? 'flex' : 'none';
+  }
+
+  function updateCount() {
+    const visible = allLogs.filter(passesFilter).length;
+    els.countBadge.textContent = `${visible} / ${allLogs.length} lines`;
+  }
+
+  function appendLine(entry) {
+    allLogs.push(entry);
+    if (allLogs.length > MAX_LINES) {
+      allLogs.shift();
+      const first = els.logContainer.querySelector('.log-line');
+      if (first) first.remove();
+    }
+    if (passesFilter(entry)) {
+      renderLine(entry, true);
+    }
+    updateCount();
+  }
+
+  function renderLine(entry, scrollAfter) {
+    const div = document.createElement('div');
+    div.className = 'log-line lvl-' + entry.level;
+    div.innerHTML = highlight(entry.raw, filterText);
+    els.logContainer.appendChild(div);
+    els.emptyState.style.display = 'none';
+    if (scrollAfter && isAutoScroll) {
+      els.logContainer.scrollTop = els.logContainer.scrollHeight;
+    }
+  }
+
+  function rerenderAll() {
+    // Clear existing rendered lines (keep emptyState node)
+    els.logContainer.querySelectorAll('.log-line').forEach(n => n.remove());
+    const frag = document.createDocumentFragment();
+    let visibleCount = 0;
+    for (const entry of allLogs) {
+      if (!passesFilter(entry)) continue;
+      visibleCount++;
+      const div = document.createElement('div');
+      div.className = 'log-line lvl-' + entry.level;
+      div.innerHTML = highlight(entry.raw, filterText);
+      frag.appendChild(div);
+    }
+    els.logContainer.appendChild(frag);
+    updateEmptyState(visibleCount);
+    updateCount();
+    if (isAutoScroll) {
+      els.logContainer.scrollTop = els.logContainer.scrollHeight;
+    }
+  }
+
+  // --- Status ---
+  function setStatus(state, text) {
+    els.statusDot.className = 'status-dot ' + state;
+    els.statusText.textContent = text;
+  }
+
+  // --- WebSocket connection ---
+  function connect() {
+    const url = els.wsUrl.value.trim();
+    if (!url) return;
+    manualDisconnect = false;
+    clearTimeout(reconnectTimer);
+
+    setStatus('connecting', 'Connecting to ' + url + '...');
+    els.btnConnect.disabled = true;
+
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      setStatus('error', 'Invalid URL: ' + e.message);
+      els.btnConnect.disabled = false;
+      return;
+    }
+
+    ws.onopen = () => {
+      localStorage.setItem('logcat_ws_url', url);
+      setStatus('connected', 'Connected to ' + url);
+      els.btnConnect.disabled = true;
+      els.btnDisconnect.disabled = false;
+      try {
+        ws.send("[SYSTEM]: Register Web Viewer");
+      } catch (e) {}
+    };
+
+    ws.onmessage = (event) => {
+      if (isPaused) return;
+      const line = String(event.data);
+      appendLine({ raw: line, level: detectLevel(line) });
+    };
+
+    ws.onclose = () => {
+      els.btnConnect.disabled = false;
+      els.btnDisconnect.disabled = true;
+      if (manualDisconnect) {
+        setStatus('', 'Disconnected');
+        return;
+      }
+      setStatus('error', 'Disconnected — retrying...');
+      if (els.autoReconnect.checked) {
+        reconnectTimer = setTimeout(connect, 2000);
+      } else {
+        setStatus('error', 'Disconnected');
+      }
+    };
+
+    ws.onerror = () => {
+      setStatus('error', 'Connection error');
+    };
+  }
+
+  function disconnect() {
+    manualDisconnect = true;
+    clearTimeout(reconnectTimer);
+    if (ws) {
+      ws.close();
+      ws = null;
+    }
+    setStatus('', 'Disconnected');
+    els.btnConnect.disabled = false;
+    els.btnDisconnect.disabled = true;
+  }
+
+  els.btnConnect.addEventListener('click', connect);
+  els.btnDisconnect.addEventListener('click', disconnect);
+  els.wsUrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') connect(); });
+
+  // --- Filter ---
+  let filterDebounce = null;
+  els.filterInput.addEventListener('input', () => {
+    clearTimeout(filterDebounce);
+    filterDebounce = setTimeout(() => {
+      filterText = els.filterInput.value;
+      rerenderAll();
+    }, 150);
+  });
+
+  // --- Level chips ---
+  els.levelChips.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const level = chip.dataset.level;
+      if (activeLevels.has(level)) {
+        activeLevels.delete(level);
+        chip.classList.remove('active');
+      } else {
+        activeLevels.add(level);
+        chip.classList.add('active');
+      }
+      rerenderAll();
+    });
+  });
+
+  // --- Auto-scroll toggle ---
+  els.btnAutoScroll.addEventListener('click', () => {
+    isAutoScroll = !isAutoScroll;
+    els.btnAutoScroll.classList.toggle('active', isAutoScroll);
+    els.btnAutoScroll.textContent = isAutoScroll ? '⬇ Auto-scroll' : '⏹ Auto-scroll off';
+    if (isAutoScroll) {
+      els.logContainer.scrollTop = els.logContainer.scrollHeight;
+    }
+  });
+
+  // --- Pause/Resume ---
+  els.btnPause.addEventListener('click', () => {
+    isPaused = !isPaused;
+    els.btnPause.textContent = isPaused ? '▶ Resume' : '⏸ Pause';
+    els.btnPause.classList.toggle('active', isPaused);
+  });
+
+  // --- Clear ---
+  els.btnClear.addEventListener('click', () => {
+    allLogs = [];
+    els.logContainer.querySelectorAll('.log-line').forEach(n => n.remove());
+    updateEmptyState(0);
+    updateCount();
+  });
+
+  // --- Export ---
+  els.btnDownload.addEventListener('click', () => {
+    const visible = allLogs.filter(passesFilter).map(e => e.raw);
+    if (visible.length === 0) return;
+    const blob = new Blob([visible.join('\n')], { type: 'text/plain' });
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    a.href = URL.createObjectURL(blob);
+    a.download = `ci-deploy-logcat-${ts}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  updateCount();
+})();
+</script>
+</body>
+</html>

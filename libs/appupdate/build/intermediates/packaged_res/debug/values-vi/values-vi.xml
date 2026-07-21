@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appupdate_close_button">Đóng</string>
+    <string name="appupdate_dialog_title">Thông tin phiên bản</string>
+    <string name="appupdate_flow_accept">Có</string>
+    <string name="appupdate_flow_cancel_button">Hủy</string>
+    <string name="appupdate_flow_decline">Không</string>
+    <string name="appupdate_flow_download_cancelled">Đã hủy tải xuống.</string>
+    <string name="appupdate_flow_download_completed">Đã tải xong! Nhấn Cài đặt để tiếp tục.</string>
+    <string name="appupdate_flow_download_error_format">Lỗi: %1$s</string>
+    <string name="appupdate_flow_download_initializing">Đang khởi tạo tải xuống…</string>
+    <string name="appupdate_flow_download_progress_format">Đang tải: %1$.1f MB / %2$.1f MB (%3$d%%)</string>
+    <string name="appupdate_flow_download_progress_indeterminate_format">Đang tải: %1$.1f MB</string>
+    <string name="appupdate_flow_download_title">Đang tải bản cập nhật</string>
+    <string name="appupdate_flow_install_button">Cài đặt</string>
+    <string name="appupdate_flow_later_button">Để sau</string>
+    <string name="appupdate_flow_manual_install_message_format">Không thể tự động cài đặt bằng quyền root.\n\n%1$s\n\nBạn có thể tiếp tục bằng trình cài đặt hệ thống.</string>
+    <string name="appupdate_flow_manual_install_title">Cài đặt Cập nhật</string>
+    <string name="appupdate_flow_new_version_message_format">Phiên bản: %1$s\n\nCó gì mới:\n%2$s</string>
+    <string name="appupdate_flow_new_version_title">Có bản cập nhật mới</string>
+    <string name="appupdate_flow_ready_message">APK đã được tải và xác minh. Bạn muốn cài đặt ngay không?</string>
+    <string name="appupdate_flow_ready_title">Bản cập nhật đã sẵn sàng</string>
+    <string name="appupdate_flow_skip_button">Bỏ qua</string>
+    <string name="appupdate_flow_update_failed_toast_format">Cập nhật lỗi: %1$s</string>
+    <string name="appupdate_flow_verification_failed_format">Xác minh thất bại: %1$s</string>
+    <string name="appupdate_flow_verifying">Đang xác minh APK đã tải…</string>
+    <string name="appupdate_grant_install_permission">Cho phép cài ứng dụng không rõ nguồn, sau đó nhấn Cài đặt lại.</string>
+    <string name="appupdate_install_date_label">Ngày cài đặt: %1$s</string>
+    <string name="appupdate_install_failed_format">Không thể mở trình cài đặt: %1$s</string>
+    <string name="appupdate_interval_default">Mặc định (Khi mở app/Resume)</string>
+    <string name="appupdate_interval_every_seconds">Mỗi %1$d giây</string>
+    <string name="appupdate_interval_header">\nChế độ kiểm tra version:</string>
+    <string name="appupdate_last_apk_label">File APK tải gần nhất: %1$s</string>
+    <string name="appupdate_last_checked_label">Lần kiểm tra gần nhất: %1$s</string>
+    <string name="appupdate_last_checked_never">Chưa kiểm tra lần nào</string>
+    <string name="appupdate_none_placeholder">Chưa có</string>
+    <string name="appupdate_save_button">Lưu</string>
+    <string name="appupdate_saved_toast">Đã cập nhật chế độ kiểm tra!</string>
+    <string name="appupdate_source_header">\nNguồn kiểm tra cập nhật:</string>
+    <string name="appupdate_source_mode_lan">LAN only (mạng nội bộ)</string>
+    <string name="appupdate_source_mode_public">Public host</string>
+    <string name="appupdate_version_info_format">Version: %1$s\nBuild No: %2$d</string>
+</resources>

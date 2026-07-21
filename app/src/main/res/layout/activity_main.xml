@@ -25,6 +25,48 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:title="CI Deployment" />
 
+        <!-- Host Not Found Notification Panel -->
+        <LinearLayout
+            android:id="@+id/panelHostNotFound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#E8F0FE"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:gravity="center_vertical"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/pbPanelProgress"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="12dp"
+                android:visibility="visible"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@+id/tvPanelError"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Initializing host discovery..."
+                android:textColor="#1A73E8"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnPanelRetry"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Retry"
+                android:textColor="#2980B9"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+
         <!-- WebView container -->
         <FrameLayout
             android:layout_width="match_parent"
@@ -54,7 +96,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="160dp"
-            android:background="?attr/colorPrimary"
+            android:background="@drawable/bg_drawer_header"
             android:orientation="vertical"
             android:padding="16dp"
             android:gravity="bottom">
@@ -68,6 +110,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvUserStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Management Portal"
@@ -75,69 +118,211 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- Menu Items List -->
-        <LinearLayout
+        <!-- Scrollable Menu Items Container -->
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:fillViewport="true"
+            android:scrollbars="none">
 
-            <!-- Settings Menu -->
             <LinearLayout
-                android:id="@+id/menuSettings"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_preferences"
-                    app:tint="?android:attr/textColorPrimary" />
+                <!-- Settings Menu -->
+                <LinearLayout
+                    android:id="@+id/menuSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="32dp"
-                    android:text="Settings"
-                    android:textSize="16sp" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_settings"
+                        app:tint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="Settings"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Logcat Menu -->
+                <LinearLayout
+                    android:id="@+id/menuLogcat"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_logcat"
+                        app:tint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="Logcat"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- API Explorer Menu -->
+                <LinearLayout
+                    android:id="@+id/menuApiExplorer"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_api"
+                        app:tint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="API Explorer"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Webserver Menu -->
+                <LinearLayout
+                    android:id="@+id/menuWebserver"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_webserver"
+                        app:tint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="Webserver"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Test TCP Menu -->
+                <LinearLayout
+                    android:id="@+id/menuTestTcp"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_tcp"
+                        app:tint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="Test TCP"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- Bluetooth Test Menu -->
+                <LinearLayout
+                    android:id="@+id/menuBluetoothTest"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_bluetooth"
+                        app:tint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="Bluetooth Test"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- About Menu -->
+                <LinearLayout
+                    android:id="@+id/menuAbout"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_about"
+                        app:tint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="About"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
             </LinearLayout>
-
-            <!-- About Menu -->
-            <LinearLayout
-                android:id="@+id/menuAbout"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_info_details"
-                    app:tint="?android:attr/textColorPrimary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="32dp"
-                    android:text="About"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-        </LinearLayout>
+        </ScrollView>
 
         <!-- Footer / Version Info at Bottom -->
         <LinearLayout
@@ -154,6 +339,24 @@
                 android:text="Version 1.0.0"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvWebConsoleInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Console: http://127.0.0.1:8085 | PIN: -"
+                android:textColor="#81C784"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchWebserver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Web Server"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="13sp" />
         </LinearLayout>
 
     </LinearLayout>

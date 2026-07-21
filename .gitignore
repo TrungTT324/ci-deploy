@@ -6,3 +6,6 @@
 /build
 /app/build
 *.apk
+
+agent-deploy/.venv/
+__pycache__/

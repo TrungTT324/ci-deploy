@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AppQa" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/qa_primary</item>
+        <item name="colorPrimaryDark">@color/qa_primary_dark</item>
+        <item name="colorAccent">@color/qa_accent</item>
+        <item name="android:windowBackground">@color/qa_background</item>
+    </style>
+</resources>
