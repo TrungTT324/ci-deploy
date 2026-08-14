@@ -21,6 +21,10 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_AUTO_START_QA_SERVICE = "auto_start_qa_service"
+    }
+
     private lateinit var statusAccessibility: TextView
     private lateinit var statusOverlay: TextView
     private lateinit var statusService: TextView
@@ -37,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnStopWebserver: Button
 
     private val handler = Handler(Looper.getMainLooper())
+    private var mediaProjectionRequestInFlight = false
     
     // Status polling runnable to update indicators when user changes settings and returns to app
     private val statusUpdateRunnable = object : Runnable {
@@ -50,6 +55,7 @@ class MainActivity : AppCompatActivity() {
     private val mediaProjectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        mediaProjectionRequestInFlight = false
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val startIntent = Intent(this, QaAutomationService::class.java).apply {
                 action = QaAutomationService.ACTION_START
@@ -76,6 +82,7 @@ class MainActivity : AppCompatActivity() {
         // colliding on the same port. Must be set before HttpWebServerService
         // is ever started.
         hdisoft.app.webserver.HttpWebServerService.defaultPort = 8086
+        hdisoft.app.webserver.SimpleHttpServer.requestHandler = QaWebRequestHandler
 
         setContentView(R.layout.activity_main)
 
@@ -115,27 +122,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnStart.setOnClickListener {
-            // Check Overlay permission first
-            val canOverlay = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Settings.canDrawOverlays(this)
-            } else {
-                true
-            }
-
-            if (!canOverlay) {
-                Toast.makeText(this, "Please grant Overlay permission first.", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
-
-            // Launch Screen Capture approval flow
-            val mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-            val captureIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                val config = android.media.projection.MediaProjectionConfig.createConfigForDefaultDisplay()
-                mediaProjectionManager.createScreenCaptureIntent(config)
-            } else {
-                mediaProjectionManager.createScreenCaptureIntent()
-            }
-            mediaProjectionLauncher.launch(captureIntent)
+            startQaAutomationServiceFlow()
         }
 
         btnStop.setOnClickListener {
@@ -170,6 +157,18 @@ class MainActivity : AppCompatActivity() {
 
         // Auto-grant permissions if rooted device
         autoGrantPermissionsIfRooted()
+
+        if (intent.getBooleanExtra(EXTRA_AUTO_START_QA_SERVICE, false)) {
+            handler.post { startQaAutomationServiceFlow() }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra(EXTRA_AUTO_START_QA_SERVICE, false)) {
+            handler.post { startQaAutomationServiceFlow() }
+        }
     }
 
     override fun onResume() {
@@ -243,6 +242,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun startQaAutomationServiceFlow() {
+        if (QaAutomationService.isRunning || mediaProjectionRequestInFlight) return
+
+        val canOverlay = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Settings.canDrawOverlays(this)
+        } else {
+            true
+        }
+        if (!canOverlay) {
+            Toast.makeText(this, "Please grant Overlay permission first.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        mediaProjectionRequestInFlight = true
+        val mediaProjectionManager =
+            getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        val captureIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val config = android.media.projection.MediaProjectionConfig.createConfigForDefaultDisplay()
+            mediaProjectionManager.createScreenCaptureIntent(config)
+        } else {
+            mediaProjectionManager.createScreenCaptureIntent()
+        }
+        mediaProjectionLauncher.launch(captureIntent)
+    }
+
     private fun getLocalIpAddress(): String {
         return hdisoft.app.core.utils.NetworkUtils.getLocalIpAddress(this) ?: "127.0.0.1"
     }
@@ -260,7 +284,9 @@ class MainActivity : AppCompatActivity() {
 
             // 1. Grant Accessibility Service safely (without overriding other services)
             val currentServices = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: ""
-            val accService = "$packageName/hdisoft.app.qa.QaAccessibilityService"
+            // Use Android's canonical short component form. Newer Android
+            // versions may discard the expanded form from the secure setting.
+            val accService = "$packageName/.QaAccessibilityService"
             val newServices = if (currentServices.isEmpty()) {
                 accService
             } else if (!currentServices.contains(accService)) {

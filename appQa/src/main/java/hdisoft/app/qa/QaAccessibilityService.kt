@@ -1,15 +1,11 @@
 package hdisoft.app.qa
 
-import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.GestureDescription
-import android.content.Intent
-import android.graphics.Path
-import android.os.Build
 import android.os.Bundle
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import hdisoft.app.qa.accessibility.BaseAccessibilityGestureService
 
-class QaAccessibilityService : AccessibilityService() {
+class QaAccessibilityService : BaseAccessibilityGestureService() {
 
     companion object {
         @Volatile
@@ -19,18 +15,12 @@ class QaAccessibilityService : AccessibilityService() {
         fun isEnabled(): Boolean = instance != null
     }
 
-    override fun onServiceConnected() {
+    override fun onGestureServiceConnected() {
         instance = this
     }
 
-    override fun onUnbind(intent: Intent?): Boolean {
+    override fun onGestureServiceDisconnected() {
         instance = null
-        return super.onUnbind(intent)
-    }
-
-    override fun onDestroy() {
-        instance = null
-        super.onDestroy()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -41,50 +31,9 @@ class QaAccessibilityService : AccessibilityService() {
         // Required method implementation
     }
 
-    /**
-     * Performs a programmatic click at the specified screen coordinates (N+).
-     */
-    fun clickAt(x: Float, y: Float, callback: ((Boolean) -> Unit)? = null): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val path = Path()
-            path.moveTo(x, y)
-            val gestureBuilder = GestureDescription.Builder()
-            gestureBuilder.addStroke(GestureDescription.StrokeDescription(path, 0, 80))
-            return dispatchGesture(gestureBuilder.build(), object : GestureResultCallback() {
-                override fun onCompleted(gestureDescription: GestureDescription?) {
-                    callback?.invoke(true)
-                }
-                override fun onCancelled(gestureDescription: GestureDescription?) {
-                    callback?.invoke(false)
-                }
-            }, null)
-        }
-        callback?.invoke(false)
-        return false
-    }
-
-    /**
-     * Swipes between two points on the screen (N+).
-     */
-    fun swipe(startX: Float, startY: Float, endX: Float, endY: Float, durationMs: Long = 300, callback: ((Boolean) -> Unit)? = null): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val path = Path()
-            path.moveTo(startX, startY)
-            path.lineTo(endX, endY)
-            val gestureBuilder = GestureDescription.Builder()
-            gestureBuilder.addStroke(GestureDescription.StrokeDescription(path, 0, durationMs))
-            return dispatchGesture(gestureBuilder.build(), object : GestureResultCallback() {
-                override fun onCompleted(gestureDescription: GestureDescription?) {
-                    callback?.invoke(true)
-                }
-                override fun onCancelled(gestureDescription: GestureDescription?) {
-                    callback?.invoke(false)
-                }
-            }, null)
-        }
-        callback?.invoke(false)
-        return false
-    }
+    /** Backward-compatible alias used by the action runner and overlay. */
+    fun clickAt(x: Float, y: Float, callback: ((Boolean) -> Unit)? = null): Boolean =
+        tap(x, y, 80, callback)
 
     /**
      * Injects text into the currently active focused input view.
@@ -131,5 +80,38 @@ class QaAccessibilityService : AccessibilityService() {
      */
     fun performNavigation(action: Int): Boolean {
         return performGlobalAction(action)
+    }
+
+    /** Finds and clicks the OEM Recents "clear/close all" control when visible. */
+    fun clickClearAllRecents(): Boolean {
+        val root = rootInActiveWindow ?: return false
+        val target = findClearAllNode(root)
+        var current = target
+        var clicked = false
+        while (current != null && !clicked) {
+            if (current.isClickable) {
+                clicked = current.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            }
+            current = current.parent
+        }
+        root.recycle()
+        return clicked
+    }
+
+    private fun findClearAllNode(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+        val labels = listOf(node.text, node.contentDescription)
+            .mapNotNull { it?.toString()?.trim()?.lowercase() }
+        val isClearAll = labels.any {
+            it == "clear all" || it == "close all" || it == "dismiss all" ||
+                it == "xóa tất cả" || it == "xoá tất cả" || it == "đóng tất cả"
+        }
+        if (isClearAll) return node
+
+        for (index in 0 until node.childCount) {
+            val child = node.getChild(index) ?: continue
+            val match = findClearAllNode(child)
+            if (match != null) return match
+        }
+        return null
     }
 }

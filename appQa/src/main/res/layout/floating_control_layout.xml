@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/floating_root"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -16,7 +17,7 @@
         android:layout_height="32dp"
         android:src="@drawable/ic_drag"
         android:contentDescription="Drag"
-        android:tint="#888888"
+        app:tint="#888888"
         android:padding="6dp" />
 
     <!-- Screenshot -->
@@ -27,7 +28,7 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_camera"
         android:contentDescription="Screenshot"
-        android:tint="#FFFFFF" />
+        app:tint="#FFFFFF" />
 
     <View
         android:layout_width="1dp"
@@ -75,7 +76,7 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_back"
         android:contentDescription="Back"
-        android:tint="#FFFFFF" />
+        app:tint="#FFFFFF" />
 
     <!-- Home Button -->
     <ImageButton
@@ -85,7 +86,7 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_home"
         android:contentDescription="Home"
-        android:tint="#FFFFFF" />
+        app:tint="#FFFFFF" />
 
     <View
         android:layout_width="1dp"
@@ -101,6 +102,6 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_close"
         android:contentDescription="Close"
-        android:tint="#FF3D00" />
+        app:tint="#FF3D00" />
 
 </LinearLayout>

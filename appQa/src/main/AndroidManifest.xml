@@ -10,8 +10,6 @@
     <!-- Permission to capture screen video and write file logs -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
@@ -27,6 +25,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppQa"
         android:usesCleartextTraffic="true">
+
+        <meta-data
+            android:name="hdisoft.app.BUILD_NO"
+            android:value="b${buildNo}" />
 
         <activity
             android:name=".MainActivity"

@@ -81,6 +81,7 @@
                 android:text="Enable Accessibility"
                 android:backgroundTint="@color/qa_accent"
                 android:textColor="@color/qa_text" />
+
         </LinearLayout>
 
         <!-- Card 2: Overlay -->
