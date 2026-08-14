@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hdisoft.local/appqa/script-actions.schema.json",
+  "title": "appQa Script Actions",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/actionModel"
+  },
+  "$defs": {
+    "dynamicValue": {
+      "description": "Any JSON value, including null"
+    },
+    "actionModel": {
+      "title": "ActionModel",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "readOnly": true,
+          "description": "Generated atomically at runtime; incoming values are ignored"
+        },
+        "name": {
+          "type": "string",
+          "pattern": ".*\\S.*"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Defaults to name when omitted"
+        },
+        "description": {
+          "type": ["string", "null"],
+          "default": null
+        },
+        "category": {
+          "type": "string",
+          "enum": ["core", "other"],
+          "description": "Defaults from name: built-in actions are core, extensions are other"
+        },
+        "input": {
+          "$ref": "#/$defs/dynamicValue"
+        },
+        "output": {
+          "$ref": "#/$defs/dynamicValue"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

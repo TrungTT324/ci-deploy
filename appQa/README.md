@@ -2,6 +2,8 @@
 
 `appQa` là một ứng dụng hỗ trợ kiểm thử tự động (QA Automation) trên hệ điều hành Android. Ứng dụng tích hợp khả năng giả lập thao tác cử chỉ (nhấn/gõ chữ) lên các ứng dụng khác mà không cần root, hiển thị thanh điều khiển nổi (Floating Control Overlay) và hỗ trợ chụp ảnh/quay phim màn hình lưu trữ trực tiếp vào thư viện thiết bị.
 
+> Bộ tài liệu theo từng tính năng và trang đọc trên trình duyệt nằm tại [`docs/`](docs/README.md).
+
 ---
 
 ## 📱 Các Tính Năng Chính
@@ -31,9 +33,10 @@
      6. Lưu hình ảnh báo cáo vào Gallery, khôi phục lại hiển thị của thanh điều khiển nổi và thông báo hoàn thành kịch bản.
 
 5. **Tích Hợp Web Server Xem Báo Cáo Từ Xa (Web Server Integration)**:
-   * Tự động khởi chạy một Web Server HTTP siêu nhẹ trên cổng `8085` ngay khi QA Service được bật.
+   * Tự động khởi chạy một Web Server HTTP siêu nhẹ trên cổng `8086` ngay khi QA Service được bật.
    * Cung cấp trang web xem báo cáo trực quan `/reports` (hoặc `/qa/reports.html`) có giao diện Dark Mode hiện đại để duyệt danh sách, xem trước ảnh chụp, phát video quay màn hình và tải xuống các báo cáo về máy tính.
    * Hiển thị địa chỉ IP và URL truy cập web server trực tiếp trên giao diện chính của ứng dụng (`MainActivity`) để người dùng dễ dàng kết nối từ máy tính cùng mạng Wi-Fi.
+   * Action List lấy động 9 core action từ `GET /api/qa/steps`, cho phép chỉnh input và chạy thử. `clear_recents` xóa các task trong Recents qua Accessibility; app không cần và không dùng root.
 
 ---
 
@@ -44,7 +47,7 @@
 * **`QaAutomationService`**: Dịch vụ nền nổi bật (Foreground Service) kết nối với phiên ghi hình `MediaProjection`. Nó trực tiếp quản lý và cập nhật vòng đời của Floating View trên `WindowManager`.
 * **`ScreenCaptureHelper` & `ScreenRecordHelper`**: Đóng gói logic chuyển đổi Surface VirtualDisplay kết nối giữa MediaProjection và các consumer (`ImageReader` / `MediaRecorder`).
 * **`MediaSaveHelper`**: Tích hợp các câu lệnh tương tác của `ContentResolver` giúp xuất tệp đa phương tiện an toàn.
-* **`HttpWebServerService` & `SimpleHttpServer`**: Dịch vụ nền chạy máy chủ web HTTP trên cổng `8085`. Server được cấu hình thêm các REST API:
+* **`HttpWebServerService` & `SimpleHttpServer`**: Dịch vụ nền chạy máy chủ web HTTP trên cổng `8086`. Server được cấu hình thêm các REST API:
   * `GET /api/qa/files`: Trả về mảng JSON chứa danh sách toàn bộ các file ảnh/video báo cáo có trong thư mục của ứng dụng kèm dung lượng và thời gian tạo.
   * `GET /qa/reports/{filename}`: Stream trực tiếp dữ liệu nhị phân của hình ảnh hoặc video được chọn về trình duyệt.
   * `GET /reports` hoặc `/qa/reports.html`: Trả về giao diện Dashboard để duyệt xem và tải báo cáo.
@@ -92,5 +95,5 @@ Khi dịch vụ hoạt động, một thanh công cụ màu xám đậm sẽ xu�
 ### Bước 4: Truy Cập Web Server Xem Báo Cáo Từ Máy Tính
 1. Đảm bảo máy tính của bạn và thiết bị chạy ứng dụng đang kết nối chung một mạng Wi-Fi cục bộ.
 2. Khi QA Service ở trạng thái **RUNNING**, quan sát dòng thông báo trên màn hình ứng dụng:
-   `Web server active at: http://<địa_chỉ_IP>:8085/reports`
+   `Web server active at: http://<địa_chỉ_IP>:8086/reports`
 3. Mở trình duyệt web trên máy tính và truy cập vào địa chỉ URL trên để bắt đầu theo dõi, xem trực tiếp và tải các video, hình ảnh báo cáo kiểm thử.
