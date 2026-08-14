@@ -19,7 +19,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -33,7 +32,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.coroutines.resume
 
 class QaAutomationService : Service() {
 
@@ -46,6 +48,9 @@ class QaAutomationService : Service() {
 
         private const val NOTIFICATION_ID = 8123
         private const val CHANNEL_ID = "qa_automation_channel"
+        private const val OVERLAY_PREFERENCES = "qa_overlay_position"
+        private const val OVERLAY_X = "x"
+        private const val OVERLAY_Y = "y"
 
         @Volatile
         var isRunning = false
@@ -108,6 +113,7 @@ class QaAutomationService : Service() {
 
             // Start HTTP Web Server
             try {
+                hdisoft.app.webserver.SimpleHttpServer.requestHandler = QaWebRequestHandler
                 hdisoft.app.webserver.SimpleHttpServer.scriptExecutor = object : hdisoft.app.webserver.SimpleHttpServer.ScriptExecutor {
                     override fun executeScript(scriptJson: String): String {
                         return ScriptTool.runScript(this@QaAutomationService, scriptJson)
@@ -188,12 +194,17 @@ class QaAutomationService : Service() {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = 100
-            y = 300
+            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            val preferences = getSharedPreferences(OVERLAY_PREFERENCES, Context.MODE_PRIVATE)
+            x = if (preferences.contains(OVERLAY_X)) preferences.getInt(OVERLAY_X, 0) else 0
+            y = if (preferences.contains(OVERLAY_Y)) preferences.getInt(OVERLAY_Y, 0) else 0
         }
 
         windowManager?.addView(floatingView, layoutParams)
+        floatingView?.post {
+            clampOverlayPosition()
+            windowManager?.updateViewLayout(floatingView, layoutParams)
+        }
 
         // Setup dragging gestures
         val dragHandle = floatingView!!.findViewById<View>(R.id.drag_handle)
@@ -216,6 +227,13 @@ class QaAutomationService : Service() {
                     MotionEvent.ACTION_MOVE -> {
                         layoutParams!!.x = initialX + (event.rawX - initialTouchX).toInt()
                         layoutParams!!.y = initialY + (event.rawY - initialTouchY).toInt()
+                        clampOverlayPosition()
+                        windowManager?.updateViewLayout(floatingView, layoutParams)
+                        return true
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        clampOverlayPosition()
+                        saveOverlayPosition()
                         windowManager?.updateViewLayout(floatingView, layoutParams)
                         return true
                     }
@@ -262,10 +280,49 @@ class QaAutomationService : Service() {
         }
     }
 
-    private fun takeScreenShot() {
+    private fun clampOverlayPosition() {
+        val view = floatingView ?: return
+        val params = layoutParams ?: return
+        if (view.width <= 0 || view.height <= 0) return
+
+        val (screenWidth, screenHeight) = currentScreenSize()
+        val maxHorizontalOffset = ((screenWidth - view.width) / 2).coerceAtLeast(0)
+        val maxY = (screenHeight - view.height).coerceAtLeast(0)
+        params.x = params.x.coerceIn(-maxHorizontalOffset, maxHorizontalOffset)
+        params.y = params.y.coerceIn(0, maxY)
+    }
+
+    private fun saveOverlayPosition() {
+        val params = layoutParams ?: return
+        getSharedPreferences(OVERLAY_PREFERENCES, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(OVERLAY_X, params.x)
+            .putInt(OVERLAY_Y, params.y)
+            .apply()
+    }
+
+    private fun currentScreenSize(): Pair<Int, Int> {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val bounds = windowManager?.currentWindowMetrics?.bounds
+            if (bounds != null) return bounds.width() to bounds.height()
+        }
+
+        val metrics = resources.displayMetrics
+        return metrics.widthPixels to metrics.heightPixels
+    }
+
+    private fun takeScreenShot(onComplete: ((String?) -> Unit)? = null) {
         val projection = mediaProjection
         if (projection == null) {
             Toast.makeText(this, "MediaProjection not active", Toast.LENGTH_SHORT).show()
+            onComplete?.invoke(null)
+            return
+        }
+
+        val captureHelper = screenCaptureHelper
+        if (captureHelper == null) {
+            Toast.makeText(this, "Screen capture is unavailable", Toast.LENGTH_SHORT).show()
+            onComplete?.invoke(null)
             return
         }
 
@@ -274,19 +331,25 @@ class QaAutomationService : Service() {
         
         // Wait briefly for UI layout to refresh without the overlay
         Handler(Looper.getMainLooper()).postDelayed({
-            screenCaptureHelper?.captureScreen(projection, object : ScreenCaptureHelper.CaptureCallback {
+            captureHelper.captureScreen(projection, object : ScreenCaptureHelper.CaptureCallback {
                 override fun onCaptureSuccess(bitmap: Bitmap) {
                     val name = "QA_Screenshot_${System.currentTimeMillis()}.png"
-                    MediaSaveHelper.saveBitmapToReports(this@QaAutomationService, bitmap, name)
+                    val reportFile = MediaSaveHelper.saveBitmapToReports(
+                        this@QaAutomationService, bitmap, name
+                    )
                     val uri = MediaSaveHelper.saveBitmapToGallery(this@QaAutomationService, bitmap, name)
+                    val reportUrl = reportFile?.let { "/qa/reports/${it.name}" }
                     
                     Handler(Looper.getMainLooper()).post {
                         floatingView?.visibility = View.VISIBLE
-                        if (uri != null) {
+                        if (reportUrl != null && uri != null) {
                             Toast.makeText(this@QaAutomationService, "Screenshot saved to Pictures/QAApp", Toast.LENGTH_LONG).show()
+                        } else if (reportUrl != null) {
+                            Toast.makeText(this@QaAutomationService, "Screenshot saved to QA reports", Toast.LENGTH_LONG).show()
                         } else {
                             Toast.makeText(this@QaAutomationService, "Failed to save screenshot", Toast.LENGTH_SHORT).show()
                         }
+                        onComplete?.invoke(reportUrl)
                     }
                 }
 
@@ -294,6 +357,7 @@ class QaAutomationService : Service() {
                     Handler(Looper.getMainLooper()).post {
                         floatingView?.visibility = View.VISIBLE
                         Toast.makeText(this@QaAutomationService, "Capture error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        onComplete?.invoke(null)
                     }
                 }
             })
@@ -367,11 +431,9 @@ class QaAutomationService : Service() {
             
             // Step 1: Wait and click center
             delay(1500)
-            val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val metrics = DisplayMetrics()
-            windowManager.defaultDisplay.getRealMetrics(metrics)
-            val centerX = metrics.widthPixels / 2f
-            val centerY = metrics.heightPixels / 2f
+            val (screenWidth, screenHeight) = currentScreenSize()
+            val centerX = screenWidth / 2f
+            val centerY = screenHeight / 2f
             
             service.clickAt(centerX, centerY)
             
@@ -423,9 +485,11 @@ class QaAutomationService : Service() {
         }
     }
 
-    fun takeScreenShotExternal() {
+    suspend fun takeScreenShotExternal(): String? = suspendCancellableCoroutine { continuation ->
         Handler(Looper.getMainLooper()).post {
-            takeScreenShot()
+            takeScreenShot { reportUrl ->
+                if (continuation.isActive) continuation.resume(reportUrl)
+            }
         }
     }
 
@@ -439,11 +503,14 @@ class QaAutomationService : Service() {
         btnRecord.clearColorFilter()
     }
 
-    fun startScreenRecordingExternal() {
+    suspend fun startScreenRecordingExternal(): Boolean = suspendCancellableCoroutine { continuation ->
         Handler(Looper.getMainLooper()).post {
-            val recorder = screenRecordHelper ?: return@post
-            val projection = mediaProjection ?: return@post
-            if (recorder.isRecordingNow()) return@post
+            val recorder = screenRecordHelper
+            val projection = mediaProjection
+            if (recorder == null || projection == null || recorder.isRecordingNow()) {
+                if (continuation.isActive) continuation.resume(false)
+                return@post
+            }
 
             val tempFile = File(cacheDir, "temp_rec.mp4")
             floatingView?.visibility = View.GONE
@@ -457,31 +524,38 @@ class QaAutomationService : Service() {
                     } else {
                         Toast.makeText(this, "Failed to start recording: $error", Toast.LENGTH_SHORT).show()
                     }
+                    if (continuation.isActive) continuation.resume(success)
                 }
             }, 150)
         }
     }
 
-    fun stopScreenRecordingExternal() {
-        Handler(Looper.getMainLooper()).post {
-            val recorder = screenRecordHelper ?: return@post
-            if (!recorder.isRecordingNow()) return@post
+    suspend fun stopScreenRecordingExternal(): String? {
+        val videoFile = withContext(Dispatchers.Main) {
+            val recorder = screenRecordHelper ?: return@withContext null
+            if (!recorder.isRecordingNow()) return@withContext null
 
-            val videoFile = recorder.stopRecording()
+            val file = recorder.stopRecording()
             updateRecordButtonUI(false)
+            file
+        } ?: return null
 
-            if (videoFile != null && videoFile.exists()) {
-                val name = "QA_Recording_${System.currentTimeMillis()}.mp4"
-                MediaSaveHelper.saveVideoToReports(this, videoFile, name)
-                val uri = MediaSaveHelper.saveVideoToGallery(this, videoFile, name)
-                if (uri != null) {
-                    Toast.makeText(this, "Video saved to Movies/QAApp", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this, "Failed to save video", Toast.LENGTH_SHORT).show()
-                }
-                videoFile.delete() // Clean up temp file
+        if (!videoFile.exists()) return null
+        val name = "QA_Recording_${System.currentTimeMillis()}.mp4"
+        val reportFile = withContext(Dispatchers.IO) {
+            val report = MediaSaveHelper.saveVideoToReports(this@QaAutomationService, videoFile, name)
+            MediaSaveHelper.saveVideoToGallery(this@QaAutomationService, videoFile, name)
+            videoFile.delete()
+            report
+        }
+        withContext(Dispatchers.Main) {
+            if (reportFile != null) {
+                Toast.makeText(this@QaAutomationService, "Video saved to Movies/QAApp", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this@QaAutomationService, "Failed to save video", Toast.LENGTH_SHORT).show()
             }
         }
+        return reportFile?.let { "/qa/reports/${it.name}" }
     }
 
     override fun onDestroy() {
