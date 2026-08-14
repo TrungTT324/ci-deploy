@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QA Automation Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/app.css?v=20260813-navigation-actions">
     <!-- Vue 3 Global Build CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
@@ -23,6 +23,9 @@
                 </li>
                 <li class="nav-item" :class="{ active: currentView === 'script' }">
                     <a href="#" @click.prevent="switchView('script')">📜 Script Console</a>
+                </li>
+                <li class="nav-item" :class="{ active: currentView === 'actions' }">
+                    <a href="#" @click.prevent="switchView('actions')">⚡ Action List</a>
                 </li>
                 <li class="nav-item" :class="{ active: currentView === 'test' }">
                     <a href="#" @click.prevent="switchView('test')">🧪 Test Console</a>
@@ -149,7 +152,7 @@
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">JSON Script Content</label>
-                                    <textarea v-model="editingScript.content" style="width: 100%; height: 220px; box-sizing: border-box; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 16px; font-family: monospace; font-size: 13px; resize: vertical; outline: none; transition: border-color 0.2s;" placeholder='[&#10;  {"action": "open_app", "query": "Calendar"},&#10;  {"action": "tap", "x": 500, "y": 800},&#10;  {"action": "capture"}&#10;]'></textarea>
+                                    <textarea v-model="editingScript.content" style="width: 100%; height: 220px; box-sizing: border-box; background-color: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); padding: 16px; font-family: monospace; font-size: 13px; resize: vertical; outline: none; transition: border-color 0.2s;" placeholder='[&#10;  {"name": "open_app", "category": "core", "input": {"query": "Calendar"}},&#10;  {"name": "tap", "category": "core", "input": {"x": 500, "y": 800}},&#10;  {"name": "capture", "category": "core"}&#10;]'></textarea>
                                 </div>
                             </div>
 
@@ -166,6 +169,135 @@
                                 <button class="btn" v-if="editingScript.id" @click="deleteScript(editingScript.id)" style="background-color: #EF4444; color: white;">Delete</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Action Definitions View -->
+                <div id="view-actions" class="view-content" v-show="currentView === 'actions'">
+                    <div class="action-list-header">
+                        <div>
+                            <h2>Executable Actions</h2>
+                            <p>Actions mapped from JSON by Gson and executed through each model's <code>doIt()</code> method.</p>
+                        </div>
+                        <span class="action-count">{{ filteredActionDefinitions.length }} actions</span>
+                    </div>
+
+                    <div class="action-toolbar">
+                        <input
+                            v-model="actionSearch"
+                            class="action-search"
+                            type="search"
+                            placeholder="Search name, display name, or description..."
+                        />
+                        <select v-model="actionCategory" class="action-filter" aria-label="Filter action category">
+                            <option value="all">All categories</option>
+                            <option value="core">Core</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="action-quick-nav" aria-label="Run Android system navigation actions">
+                        <span>System navigation</span>
+                        <button class="btn btn-small btn-secondary" :disabled="actionRunning" @click="selectAndRunAction('home')">⌂ Home</button>
+                        <button class="btn btn-small btn-secondary" :disabled="actionRunning" @click="selectAndRunAction('back')">← Back</button>
+                        <button class="btn btn-small btn-secondary" :disabled="actionRunning" @click="selectAndRunAction('recents')">▣ Recents</button>
+                    </div>
+
+                    <div class="action-workspace" v-if="filteredActionDefinitions.length">
+                        <aside class="action-master" aria-label="Action list">
+                            <button
+                                v-for="(action, index) in filteredActionDefinitions"
+                                :key="action.name"
+                                class="action-list-item"
+                                :class="{ active: selectedAction && selectedAction.name === action.name }"
+                                @click="selectAction(action)"
+                            >
+                                <span class="action-list-number">{{ index + 1 }}</span>
+                                <span class="action-list-copy">
+                                    <strong>{{ action.displayName }}</strong>
+                                    <code>{{ action.name }}</code>
+                                    <small>{{ action.description }}</small>
+                                </span>
+                            </button>
+                        </aside>
+
+                        <section class="action-detail" v-if="selectedAction">
+                            <div class="action-detail-header">
+                                <div>
+                                    <div class="action-title-row">
+                                        <h3>{{ selectedAction.displayName }}</h3>
+                                        <span class="category-badge" :class="'category-' + selectedAction.category">{{ selectedAction.category }}</span>
+                                    </div>
+                                    <code class="action-name">{{ selectedAction.name }}</code>
+                                </div>
+                                <span class="implementation-badge">{{ selectedAction.className }}</span>
+                            </div>
+
+                            <p class="action-description">{{ selectedAction.description }}</p>
+
+                            <div class="action-detail-meta">
+                                <span>Output type <code>{{ selectedAction.output }}</code></span>
+                                <span>Method <code>{{ selectedAction.className }}.doIt()</code></span>
+                            </div>
+
+                            <label class="action-field-label" for="action-input">Input (JSON)</label>
+                            <textarea
+                                id="action-input"
+                                v-model="actionInputText"
+                                class="action-editor"
+                                spellcheck="false"
+                                aria-describedby="action-input-help"
+                            ></textarea>
+                            <small id="action-input-help" class="action-field-help">Edit the input object, then run this action on the connected device.</small>
+
+                            <div class="action-detail-actions">
+                                <button class="btn btn-small" :disabled="actionRunning" @click="runSelectedAction()">
+                                    {{ actionRunning ? 'Running…' : 'Run Action' }}
+                                </button>
+                                <button class="btn btn-small btn-secondary" :disabled="actionRunning" @click="resetActionInput()">Reset Input</button>
+                                <button class="btn btn-small btn-secondary" @click="useActionInScript(selectedAction)">+ Add to Script</button>
+                                <button class="btn btn-small btn-secondary" @click="copyActionJson(selectedAction)">Copy JSON</button>
+                            </div>
+
+                            <div class="action-output-header">
+                                <span>Output / Result</span>
+                                <span v-if="actionResultState" class="action-result-state" :class="actionResultState">{{ actionResultState }}</span>
+                            </div>
+                            <pre class="action-output"><code>{{ actionOutputText || 'Run the action to see its output and execution result.' }}</code></pre>
+                            <a
+                                v-if="actionOutputImageUrl"
+                                class="action-output-image-link"
+                                :href="actionOutputImageUrl"
+                                target="_blank"
+                                rel="noopener"
+                                title="Open captured image"
+                            >
+                                <img class="action-output-image" :src="actionOutputImageUrl" alt="Capture action output">
+                            </a>
+                            <video
+                                v-if="actionOutputVideoUrl"
+                                class="action-output-video"
+                                :src="actionOutputVideoUrl"
+                                controls
+                                preload="metadata"
+                            ></video>
+                            <a
+                                v-if="actionOutputVideoUrl"
+                                class="action-output-video-link"
+                                :href="actionOutputVideoUrl"
+                                target="_blank"
+                                rel="noopener"
+                            >Open recorded video</a>
+                        </section>
+                    </div>
+
+                    <div class="card action-empty" v-else>
+                        <h2>{{ actionDefinitionsLoading ? 'Loading steps…' : 'No actions found' }}</h2>
+                        <p>{{ actionDefinitionsLoading ? 'Reading core actions from ActionRegistry.' : 'Try another search term or category.' }}</p>
+                    </div>
+
+                    <div v-if="actionStatus.text" class="action-toast" :class="{ error: actionStatus.isError }">
+                        {{ actionStatus.text }}
                     </div>
                 </div>
 
@@ -232,6 +364,6 @@
     </div>
 
     <!-- Load App Script -->
-    <script src="/js/app.js"></script>
+    <script src="/js/app.js?v=20260813-navigation-actions"></script>
 </body>
 </html>
