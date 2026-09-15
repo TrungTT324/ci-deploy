@@ -38,6 +38,18 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release-pkg/CI-Deploy_debug.apk
 
       - name: Create Release and Upload Asset
+        # PAUSED 2026-09-15 (WorkItem 5c928545): app/ci-deploy.jks (the key this build was
+        # signed with) is committed in git history and must be treated as compromised — see
+        # CODE_REVIEW_2026-08-11.md CRITICAL-01. This step is disabled so CI stops publishing
+        # public GitHub Releases signed with that key while the key is rotated.
+        # Do NOT re-enable by just deleting this `if: false` line — first: (1) the new
+        # keystore must exist and be wired into app/build.gradle.kts via local.properties/env
+        # vars (done, see that file's signingConfigs block), AND (2) the repo secrets
+        # CI_DEPLOY_RELEASE_STORE_PASSWORD / CI_DEPLOY_RELEASE_KEY_PASSWORD /
+        # CI_DEPLOY_RELEASE_KEYSTORE_BASE64 must be added under Settings > Secrets and
+        # variables > Actions (an admin/owner action, not something this workflow or an
+        # agent session can safely do on its own). Only then remove this `if: false`.
+        if: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
