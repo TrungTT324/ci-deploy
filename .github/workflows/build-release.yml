@@ -52,21 +52,17 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release-pkg/CI-Deploy_debug.apk
 
       - name: Create Release and Upload Asset
-        # PAUSED 2026-09-15 (WorkItem 5c928545): app/ci-deploy.jks (the key this build was
-        # signed with) is committed in git history and must be treated as compromised — see
-        # CODE_REVIEW_2026-08-11.md CRITICAL-01. This step is disabled so CI stops publishing
-        # public GitHub Releases signed with that key while the key is rotated.
-        # Status: (1) a new keystore exists locally and app/build.gradle.kts +
-        # this workflow's "Decode release keystore"/"Build with Gradle" steps above are wired
-        # to consume it via env vars — DONE. (2) The repo secrets
-        # CI_DEPLOY_RELEASE_STORE_PASSWORD / CI_DEPLOY_RELEASE_KEY_PASSWORD /
-        # CI_DEPLOY_RELEASE_KEYSTORE_BASE64 (base64 of the new .jks file) must still be added
-        # under Settings > Secrets and variables > Actions — this is an admin/owner action,
-        # not something this workflow or an agent session can safely do on its own — NOT DONE.
-        # Only after those secrets exist AND a maintainer has confirmed a CI build is actually
-        # signed with the new key (e.g. via the "Decode release keystore" step above having
-        # run) should this `if: false` be removed.
-        if: false
+        # RESUMED 2026-09-16 (WorkItem 5c928545): app/ci-deploy.jks (the old key this build
+        # was signed with) was compromised — see CODE_REVIEW_2026-08-11.md CRITICAL-01. CI was
+        # paused on 2026-09-15 to stop publishing releases signed with that key while it was
+        # rotated. Rotation is now complete: a new keystore was generated, app/build.gradle.kts
+        # and this workflow's "Decode release keystore"/"Build with Gradle" steps consume it via
+        # env vars, and the owner has added the CI_DEPLOY_RELEASE_STORE_PASSWORD /
+        # CI_DEPLOY_RELEASE_KEY_PASSWORD / CI_DEPLOY_RELEASE_KEYSTORE_BASE64 repo secrets under
+        # Settings > Secrets and variables > Actions. Gated on the keystore secret being present
+        # (rather than an unconditional `if: true`) so this stays paused automatically if the
+        # secrets are ever removed or rotated out again.
+        if: ${{ secrets.CI_DEPLOY_RELEASE_KEYSTORE_BASE64 != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
