@@ -1,0 +1,21 @@
+hdisoft.app.logcat
+drawable bg_warning_banner
+id btnClear
+id btnRefresh
+id btnShare
+id btnStreamSettings
+id btnToggleScroll
+id etFilter
+id layoutReadLogsWarning
+id layoutUrlDisplay
+id pbLoading
+id rvLogcat
+id toolbarLogcat
+id tvEmpty
+id tvFullUrl
+id tvLogText
+id tvReadLogsCommand
+id tvStreamStatus
+layout activity_logcat
+layout item_log
+style LogcatTheme

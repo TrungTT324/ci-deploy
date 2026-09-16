@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI-Deploy Logcat Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c10;
+    --bg-card: #1f2833;
+    --text-primary: #c5c6c7;
+    --text-bright: #ffffff;
+    --accent: #66fcf1;
+    --accent-hover: #45f3e5;
+    --accent-dim: #1f2833;
+    --danger: #ff4d4d;
+    --danger-hover: #ff1a1a;
+    --success: #2ecc71;
+    --info: #3498db;
+    --warning: #f1c40f;
+    --border: rgba(102, 252, 241, 0.1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    font-size: 28px;
+    background: linear-gradient(135deg, var(--accent), #45b6fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 8px rgba(102, 252, 241, 0.4));
+  }
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.5px;
+  }
+
+  /* Connection Control */
+  .connection-panel {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 15px 20px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .input-group {
+    display: flex;
+    flex: 1;
+    min-width: 280px;
+    background: #0f1115;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .input-group:focus-within {
+    border-color: var(--accent);
+  }
+
+  .input-group label {
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .input-group input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-bright);
+    padding: 10px 15px;
+    font-size: 14px;
+    flex: 1;
+    font-family: 'Space Mono', monospace;
+  }
+
+  button {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  button.primary {
+    background: var(--accent);
+    color: #0b0c10;
+  }
+
+  button.primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 0 15px rgba(102, 252, 241, 0.4);
+    transform: translateY(-1px);
+  }
+
+  button.danger {
+    background: rgba(255, 77, 77, 0.15);
+    color: var(--danger);
+    border: 1px solid rgba(255, 77, 77, 0.3);
+  }
+
+  button.danger:hover {
+    background: var(--danger);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+    transform: translateY(-1px);
+  }
+
+  button.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  button.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-bright);
+  }
+
+  button:active {
+    transform: translateY(1px);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Status Indicator */
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #7f8c8d;
+    box-shadow: 0 0 8px #7f8c8d;
+  }
+
+  .status-dot.connected {
+    background: var(--success);
+    box-shadow: 0 0 12px var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  .status-dot.connecting {
+    background: var(--warning);
+    box-shadow: 0 0 12px var(--warning);
+    animation: pulse 1s infinite;
+  }
+
+  .status-dot.disconnected {
+    background: var(--danger);
+    box-shadow: 0 0 12px var(--danger);
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Stats Dashboard */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+  }
+
+  .stat-card.total::before { background: var(--accent); }
+  .stat-card.producers::before { background: var(--success); }
+  .stat-card.consumers::before { background: var(--info); }
+  .stat-card.dashboards::before { background: var(--warning); }
+
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-val {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+
+  .stat-icon {
+    font-size: 36px;
+    opacity: 0.15;
+  }
+
+  /* Table Area */
+  .panel {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .panel-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  th {
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background: rgba(255, 255, 255, 0.01);
+  }
+
+  .client-id {
+    font-family: 'Space Mono', monospace;
+    color: var(--text-bright);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  /* Badges */
+  .badge {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .badge-app {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(46, 204, 113, 0.25);
+  }
+
+  .badge-viewer {
+    background: rgba(52, 152, 219, 0.15);
+    color: var(--info);
+    border: 1px solid rgba(52, 152, 219, 0.25);
+  }
+
+  .badge-dash {
+    background: rgba(241, 196, 15, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(241, 196, 15, 0.25);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Empty State */
+  .empty-state {
+    padding: 50px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .empty-icon {
+    font-size: 48px;
+  }
+
+  /* Toast Alerts */
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .toast {
+    background: #1f2833;
+    color: var(--text-bright);
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-left: 4px solid var(--accent);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    transform: translateY(100px);
+    opacity: 0;
+    animation: slideIn 0.3s forwards;
+  }
+
+  .toast.error {
+    border-left-color: var(--danger);
+  }
+
+  @keyframes slideIn {
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .time-cell {
+    font-family: 'Space Mono', monospace;
+    opacity: 0.7;
+    font-size: 13px;
+  }
+
+  /* Log Area */
+  .log-container {
+    height: 420px;
+    overflow-y: auto;
+    background: #0d0d0e;
+    padding: 12px;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .log-line {
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    padding: 2px 6px;
+  }
+
+  .log-line:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .lvl-E { color: var(--danger); }
+  .lvl-W { color: var(--warning); }
+  .lvl-I { color: var(--success); }
+  .lvl-D { color: var(--info); }
+  .lvl-V { color: #95a5a6; }
+  .lvl-SYS { color: #e67e22; font-style: italic; }
+  .lvl-DEFAULT { color: var(--text-primary); }
+
+  /* Log toolbar */
+  .log-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.15);
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .log-filter {
+    background: #0f1115;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: var(--text-bright);
+    padding: 7px 12px;
+    font-size: 13px;
+    outline: none;
+    flex: 1;
+    min-width: 200px;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .log-filter:focus {
+    border-color: var(--accent);
+  }
+
+  .level-chips {
+    display: flex;
+    gap: 5px;
+  }
+
+  .chip {
+    padding: 5px 11px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.4);
+    user-select: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s;
+  }
+
+  .chip.active[data-level="V"] { background: #95a5a6; color: #111; border-color: #95a5a6; }
+  .chip.active[data-level="D"] { background: var(--info); color: #111; border-color: var(--info); }
+  .chip.active[data-level="I"] { background: var(--success); color: #111; border-color: var(--success); }
+  .chip.active[data-level="W"] { background: var(--warning); color: #111; border-color: var(--warning); }
+  .chip.active[data-level="E"] { background: var(--danger); color: #fff; border-color: var(--danger); }
+  
+  mark {
+    background: #ffd54f;
+    color: #000;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  
+  <!-- Header -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">📡</div>
+      <div>
+        <h1>Logcat Server Admin</h1>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4)">Xem và Quản lý kết nối Client thời gian thực</p>
+      </div>
+    </div>
+    
+    <div class="status-badge">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Chưa kết nối</span>
+    </div>
+  </header>
+
+  <!-- Connection Control Panel -->
+  <div class="connection-panel">
+    <div class="input-group">
+      <label for="wsUrl">WebSocket URL</label>
+      <input type="text" id="wsUrl" placeholder="ws://localhost:8082" />
+    </div>
+    <button id="btnConnect" class="primary">Kết nối</button>
+    <button id="btnDisconnect" class="danger" disabled>Ngắt kết nối</button>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-info">
+        <span class="stat-label">Tổng kết nối</span>
+        <span class="stat-val" id="statTotal">0</span>
+      </div>
+      <div class="stat-icon">👥</div>
+    </div>
+    
+    <div class="stat-card producers">
+      <div class="stat-info">
+        <span class="stat-label">Android App (Producers)</span>
+        <span class="stat-val" id="statProducers">0</span>
+      </div>
+      <div class="stat-icon">📱</div>
+    </div>
+    
+    <div class="stat-card consumers">
+      <div class="stat-info">
+        <span class="stat-label">Web Viewers</span>
+        <span class="stat-val" id="statConsumers">0</span>
+      </div>
+      <div class="stat-icon">💻</div>
+    </div>
+    
+    <div class="stat-card dashboards">
+      <div class="stat-info">
+        <span class="stat-label">Dashboard Consoles</span>
+        <span class="stat-val" id="statDashboards">0</span>
+      </div>
+      <div class="stat-icon">🛠️</div>
+    </div>
+  </div>
+
+  <!-- Clients List Table Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Danh sách các Client đang hoạt động</span>
+      <button id="btnRefresh" class="secondary" style="padding: 6px 12px; font-size:12px">🔄 Refresh</button>
+    </div>
+    
+    <div class="table-responsive">
+      <table id="clientsTable">
+        <thead>
+          <tr>
+            <th>Client ID (IP:Port)</th>
+            <th>Loại Client</th>
+            <th>Mẫu Thiết Bị</th>
+            <th>Thời gian kết nối</th>
+            <th style="width: 250px">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="clientsTableBody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+      
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🔌</div>
+        <h3>Không có Client kết nối</h3>
+        <p>Vui lòng kết nối Dashboard tới server hoặc kiểm tra trạng thái hoạt động của server Python.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Logcat Panel -->
+  <div class="panel">
+    <div class="panel-header" style="border-bottom:none">
+      <span class="panel-title">📺 Live Logcat Stream từ thiết bị</span>
+      <div style="display:flex; gap: 8px">
+        <button id="btnLogAutoScroll" class="primary" style="padding: 6px 12px; font-size:12px">⬇ Auto-scroll: ON</button>
+        <button id="btnLogClear" class="danger" style="padding: 6px 12px; font-size:12px">🗑 Xoá Log</button>
+      </div>
+    </div>
+    
+    <div class="log-toolbar">
+      <input type="text" id="logFilter" class="log-filter" placeholder="Lọc logcat (ví dụ: MainActivity, substring)..." />
+      <div class="level-chips" id="logLevelChips">
+        <div class="chip active" data-level="V">V</div>
+        <div class="chip active" data-level="D">D</div>
+        <div class="chip active" data-level="I">I</div>
+        <div class="chip active" data-level="W">W</div>
+        <div class="chip active" data-level="E">E</div>
+      </div>
+    </div>
+    
+    <div class="log-container" id="logContainer">
+      <div class="empty-state" id="logEmptyState" style="padding: 100px 20px;">
+        <div class="empty-icon">📺</div>
+        <h3>Chờ nhận log từ thiết bị...</h3>
+        <p>Logcat sẽ tự động hiển thị ở đây khi app Android ở chế độ CLIENT kết nối và truyền log lên.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const els = {
+    wsUrl: document.getElementById('wsUrl'),
+    btnConnect: document.getElementById('btnConnect'),
+    btnDisconnect: document.getElementById('btnDisconnect'),
+    btnRefresh: document.getElementById('btnRefresh'),
+    statusDot: document.getElementById('statusDot'),
+    statusText: document.getElementById('statusText'),
+    statTotal: document.getElementById('statTotal'),
+    statProducers: document.getElementById('statProducers'),
+    statConsumers: document.getElementById('statConsumers'),
+    statDashboards: document.getElementById('statDashboards'),
+    clientsTableBody: document.getElementById('clientsTableBody'),
+    emptyState: document.getElementById('emptyState'),
+    toastContainer: document.getElementById('toastContainer'),
+    
+    // Logcat elements
+    logContainer: document.getElementById('logContainer'),
+    logEmptyState: document.getElementById('logEmptyState'),
+    btnLogAutoScroll: document.getElementById('btnLogAutoScroll'),
+    btnLogClear: document.getElementById('btnLogClear'),
+    logFilter: document.getElementById('logFilter'),
+    logLevelChips: document.getElementById('logLevelChips')
+  };
+
+  let ws = null;
+  let autoReconnect = true;
+  let reconnectTimer = null;
+  let selfId = null;
+
+  // Logcat states
+  let allLogs = [];
+  let isAutoScroll = true;
+  let filterText = '';
+  const activeLevels = new Set(['V', 'D', 'I', 'W', 'E']);
+  const MAX_LOG_LINES = 1000;
+
+  // Auto-detect WebSocket URL based on window.location
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = window.location.host;
+  const defaultWsUrl = window.location.protocol.startsWith('http') ? `${protocol}//${host}/` : 'ws://localhost:8082';
+
+  // Restore saved URL or auto-detect
+  const savedUrl = localStorage.getItem('logcat_admin_ws_url') || defaultWsUrl;
+  els.wsUrl.value = savedUrl;
+
+  function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (isError ? ' error' : '');
+    toast.innerHTML = `
+      <span>${isError ? '⚠️' : '🔔'}</span>
+      <span>${message}</span>
+    `;
+    els.toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'none';
+      toast.offsetHeight; /* trigger reflow */
+      toast.style.transition = 'opacity 0.5s';
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 500);
+    }, 3500);
+  }
+
+  function setStatus(state, text) {
+    els.statusDot.className = 'status-dot ' + state;
+    els.statusText.textContent = text;
+  }
+
+  function updateStats(clients) {
+    const stats = {
+      total: clients.length,
+      producers: 0,
+      consumers: 0,
+      dashboards: 0
+    };
+
+    clients.forEach(c => {
+      if (c.type === 'Android App') stats.producers++;
+      else if (c.type === 'Web Viewer') stats.consumers++;
+      else if (c.type === 'Dashboard') stats.dashboards++;
+    });
+
+    els.statTotal.textContent = stats.total;
+    els.statProducers.textContent = stats.producers;
+    els.statConsumers.textContent = stats.consumers;
+    els.statDashboards.textContent = stats.dashboards;
+  }
+
+  function renderClients(clients) {
+    els.clientsTableBody.innerHTML = '';
+    
+    if (clients.length === 0) {
+      els.emptyState.style.display = 'flex';
+      return;
+    }
+    
+    els.emptyState.style.display = 'none';
+
+    clients.forEach(client => {
+      const tr = document.createElement('tr');
+      
+      // Client ID (ip:port)
+      const tdId = document.createElement('td');
+      tdId.innerHTML = `<span class="client-id">${client.id}</span>`;
+      tr.appendChild(tdId);
+      
+      // Type Badge
+      const tdType = document.createElement('td');
+      let badgeClass = 'badge-viewer';
+      if (client.type === 'Android App') badgeClass = 'badge-app';
+      else if (client.type === 'Dashboard') badgeClass = 'badge-dash';
+      
+      tdType.innerHTML = `<span class="badge ${badgeClass}">${client.type}</span>`;
+      tr.appendChild(tdType);
+      
+      // Device Model
+      const tdModel = document.createElement('td');
+      tdModel.textContent = client.model || 'Unknown';
+      tdModel.style.fontWeight = '500';
+      tr.appendChild(tdModel);
+      
+      // Connected Time
+      const tdTime = document.createElement('td');
+      tdTime.className = 'time-cell';
+      tdTime.textContent = client.connected_at || '--:--';
+      tr.appendChild(tdTime);
+      
+      // Actions
+      const tdActions = document.createElement('td');
+      tdActions.className = 'action-buttons';
+      
+      // Ping button
+      const btnPing = document.createElement('button');
+      btnPing.className = 'secondary';
+      btnPing.style.padding = '5px 10px';
+      btnPing.style.fontSize = '12px';
+      btnPing.innerHTML = '💬 Ping';
+      btnPing.onclick = () => sendPing(client.id);
+      
+      // Disconnect button
+      const btnKick = document.createElement('button');
+      btnKick.className = 'danger';
+      btnKick.style.padding = '5px 10px';
+      btnKick.style.fontSize = '12px';
+      btnKick.innerHTML = '🚫 Ngắt kết nối';
+      btnKick.onclick = () => disconnectClient(client.id);
+      
+      // Disable self actions
+      if (client.id === selfId) {
+        btnKick.disabled = true;
+        btnKick.title = 'Bạn không thể tự ngắt kết nối chính mình';
+      }
+
+      tdActions.appendChild(btnPing);
+      tdActions.appendChild(btnKick);
+      tr.appendChild(tdActions);
+      
+      els.clientsTableBody.appendChild(tr);
+    });
+  }
+
+  // --- Logcat Logic ---
+  function detectLevel(line) {
+    if (line.startsWith('[SYSTEM]')) return 'SYS';
+    if (line.includes(" E/") || line.includes(" E ") || line.includes(" F/") || line.includes(" F ")) return 'E';
+    if (line.includes(" W/") || line.includes(" W ")) return 'W';
+    if (line.includes(" I/") || line.includes(" I ")) return 'I';
+    if (line.includes(" D/") || line.includes(" D ")) return 'D';
+    if (line.includes(" V/") || line.includes(" V ")) return 'V';
+    return 'DEFAULT';
+  }
+
+  function passesFilter(entry) {
+    if (entry.level !== 'SYS' && entry.level !== 'DEFAULT' && !activeLevels.has(entry.level)) return false;
+    if (filterText) {
+      return entry.raw.toLowerCase().includes(filterText.toLowerCase());
+    }
+    return true;
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function highlight(text, query) {
+    if (!query) return escapeHtml(text);
+    const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+  }
+
+  function renderLine(entry) {
+    els.logEmptyState.style.display = 'none';
+    const div = document.createElement('div');
+    div.className = 'log-line lvl-' + entry.level;
+    div.innerHTML = highlight(entry.raw, filterText);
+    els.logContainer.appendChild(div);
+    
+    if (isAutoScroll) {
+      els.logContainer.scrollTop = els.logContainer.scrollHeight;
+    }
+  }
+
+  function appendLog(rawLine) {
+    const level = detectLevel(rawLine);
+    const entry = { raw: rawLine, level: level };
+    allLogs.push(entry);
+    
+    if (allLogs.length > MAX_LOG_LINES) {
+      allLogs.shift();
+      const firstLine = els.logContainer.querySelector('.log-line');
+      if (firstLine) firstLine.remove();
+    }
+    
+    if (passesFilter(entry)) {
+      renderLine(entry);
+    }
+  }
+
+  function rerenderAllLogs() {
+    els.logContainer.querySelectorAll('.log-line').forEach(n => n.remove());
+    const visibleLogs = allLogs.filter(passesFilter);
+    
+    if (visibleLogs.length === 0) {
+      els.logEmptyState.style.display = 'flex';
+      return;
+    }
+    
+    els.logEmptyState.style.display = 'none';
+    const frag = document.createDocumentFragment();
+    visibleLogs.forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'log-line lvl-' + entry.level;
+      div.innerHTML = highlight(entry.raw, filterText);
+      frag.appendChild(div);
+    });
+    els.logContainer.appendChild(frag);
+    
+    if (isAutoScroll) {
+      els.logContainer.scrollTop = els.logContainer.scrollHeight;
+    }
+  }
+
+  // --- WebSocket Connection ---
+  function connect() {
+    const url = els.wsUrl.value.trim();
+    if (!url) return;
+
+    clearTimeout(reconnectTimer);
+    setStatus('connecting', 'Đang kết nối...');
+    els.btnConnect.disabled = true;
+
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      setStatus('disconnected', 'Lỗi URL: ' + e.message);
+      els.btnConnect.disabled = false;
+      return;
+    }
+
+    ws.onopen = () => {
+      localStorage.setItem('logcat_admin_ws_url', url);
+      setStatus('connected', 'Đã kết nối');
+      els.btnConnect.disabled = true;
+      els.btnDisconnect.disabled = false;
+      showToast('Đã kết nối tới WebSocket Server thành công!');
+      
+      // Register as Admin Dashboard
+      ws.send("[SYSTEM]: Register Dashboard");
+    };
+
+    ws.onmessage = (event) => {
+      const rawData = event.data;
+      try {
+        const data = JSON.parse(rawData);
+        if (data.type === 'client_list_update') {
+          updateStats(data.clients);
+          renderClients(data.clients);
+        } else {
+          // If it is another valid JSON, ignore or treat differently
+        }
+      } catch (e) {
+        // Raw message received -> It's a log line from device!
+        appendLog(rawData);
+      }
+    };
+
+    ws.onclose = () => {
+      els.btnConnect.disabled = false;
+      els.btnDisconnect.disabled = true;
+      setStatus('disconnected', 'Ngắt kết nối');
+      updateStats([]);
+      renderClients([]);
+      
+      if (autoReconnect) {
+        showToast('Mất kết nối server. Đang thử kết nối lại sau 3s...', true);
+        reconnectTimer = setTimeout(connect, 3000);
+      }
+    };
+
+    ws.onerror = () => {
+      setStatus('disconnected', 'Lỗi kết nối');
+    };
+  }
+
+  function disconnect() {
+    autoReconnect = false;
+    clearTimeout(reconnectTimer);
+    if (ws) {
+      ws.close();
+      ws = null;
+    }
+    setStatus('disconnected', 'Chưa kết nối');
+    els.btnConnect.disabled = false;
+    els.btnDisconnect.disabled = true;
+    updateStats([]);
+    renderClients([]);
+    autoReconnect = true; // reset for next manual connect
+  }
+
+  function disconnectClient(clientId) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    if (confirm(`Bạn có chắc chắn muốn ngắt kết nối client ${clientId}?`)) {
+      ws.send(JSON.stringify({
+        action: 'disconnect_client',
+        target_id: clientId
+      }));
+      showToast(`Đã gửi yêu cầu ngắt kết nối cho: ${clientId}`);
+    }
+  }
+
+  function sendPing(clientId) {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    const msg = prompt("Nhập tin nhắn muốn gửi:", "Kiểm tra kết nối từ Admin!");
+    if (msg === null) return; // cancelled
+    
+    ws.send(JSON.stringify({
+      action: 'send_test_message',
+      target_id: clientId,
+      message: msg
+    }));
+    showToast(`Đã gửi tin nhắn test tới: ${clientId}`);
+  }
+
+  // --- Listeners ---
+  els.btnConnect.addEventListener('click', connect);
+  els.btnDisconnect.addEventListener('click', disconnect);
+  els.wsUrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') connect(); });
+  
+  els.btnRefresh.addEventListener('click', () => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send("[SYSTEM]: Register Dashboard"); // Re-trigger client list refresh
+      showToast('Đang làm mới danh sách client...');
+    } else {
+      showToast('Chưa kết nối tới server!', true);
+    }
+  });
+
+  // Logcat Controls Listeners
+  els.btnLogClear.addEventListener('click', () => {
+    allLogs = [];
+    els.logContainer.querySelectorAll('.log-line').forEach(n => n.remove());
+    els.logEmptyState.style.display = 'flex';
+    showToast('Đã xoá bộ đệm hiển thị log');
+  });
+
+  els.btnLogAutoScroll.addEventListener('click', () => {
+    isAutoScroll = !isAutoScroll;
+    els.btnLogAutoScroll.textContent = isAutoScroll ? '⬇ Auto-scroll: ON' : '⏹ Auto-scroll: OFF';
+    els.btnLogAutoScroll.classList.toggle('primary', isAutoScroll);
+    els.btnLogAutoScroll.classList.toggle('secondary', !isAutoScroll);
+    
+    if (isAutoScroll) {
+      els.logContainer.scrollTop = els.logContainer.scrollHeight;
+    }
+  });
+
+  let filterDebounce = null;
+  els.logFilter.addEventListener('input', () => {
+    clearTimeout(filterDebounce);
+    filterDebounce = setTimeout(() => {
+      filterText = els.logFilter.value;
+      rerenderAllLogs();
+    }, 150);
+  });
+
+  els.logLevelChips.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const level = chip.dataset.level;
+      if (activeLevels.has(level)) {
+        activeLevels.delete(level);
+        chip.classList.remove('active');
+      } else {
+        activeLevels.add(level);
+        chip.classList.add('active');
+      }
+      rerenderAllLogs();
+    });
+  });
+
+  // Auto connect on load
+  connect();
+})();
+</script>
+</body>
+</html>

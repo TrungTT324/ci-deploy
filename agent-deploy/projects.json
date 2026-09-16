@@ -1,0 +1,48 @@
+{
+  "projects": [
+    {
+      "name": "ci-deploy",
+      "sourceDir": "/Users/trungtruong/xsofts_prj/web/github/ci-deploy",
+      "branch": "main",
+      "destDir": "/opt/homebrew/var/www/ci-deploy",
+      "framework": "custom",
+      "buildCommand": "./gradlew assembleDebug assembleRelease",
+      "apkPath": "app/build/outputs/apk/debug/app-debug.apk",
+      "artifactFileName": "CI-Deploy_debug.apk",
+      "url": "/ci-deploy/CI-Deploy_debug.apk",
+      "packageName": "hdisoft.app.cideploy",
+      "version": "1.0.0",
+      "buildNote": "CI-Deploy OTA debug"
+    },
+    {
+      "name": "appci",
+      "sourceDir": "/Users/trungtruong/xsofts_prj/web/github/appci",
+      "branch": "main",
+      "destDir": "/opt/homebrew/var/www/appci",
+      "framework": "native"
+    },
+    {
+      "name": "demo-flutter-app",
+      "sourceDir": "/Users/trungtruong/xsofts_prj/flutter/demo-flutter-app",
+      "branch": "main",
+      "destDir": "/opt/homebrew/var/www/demo-flutter-app",
+      "framework": "flutter"
+    },
+    {
+      "name": "demo-reactnative-app",
+      "sourceDir": "/Users/trungtruong/xsofts_prj/reactnative/demo-reactnative-app",
+      "branch": "main",
+      "destDir": "/opt/homebrew/var/www/demo-reactnative-app",
+      "framework": "reactnative"
+    },
+    {
+      "name": "demo-custom-app",
+      "sourceDir": "/Users/trungtruong/xsofts_prj/custom/demo-custom-app",
+      "branch": "main",
+      "destDir": "/opt/homebrew/var/www/demo-custom-app",
+      "framework": "custom",
+      "buildCommand": "make build-debug",
+      "apkPath": "output/app-debug.apk"
+    }
+  ]
+}

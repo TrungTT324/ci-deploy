@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>CI Deploy Agent</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f6f8; margin: 0; padding: 2rem; color: #1a1a1a; }
+  h1 { font-size: 1.4rem; margin-bottom: 1.5rem; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #eee; vertical-align: top; }
+  th { background: #fafafa; font-size: 0.8rem; text-transform: uppercase; color: #666; }
+  tr:last-child td { border-bottom: none; }
+  .path { font-family: ui-monospace, monospace; font-size: 0.8rem; color: #555; word-break: break-all; }
+  .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+  .badge-idle { background: #eee; color: #666; }
+  .badge-building { background: #fff3cd; color: #8a6d00; }
+  .badge-success { background: #d4edda; color: #1e7e34; }
+  .badge-failed { background: #f8d7da; color: #a71d2a; }
+  button { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+  button:disabled { background: #aac0f0; cursor: not-allowed; }
+  .log { margin-top: 0.4rem; max-height: 120px; overflow: auto; background: #111; color: #ddd; font-family: ui-monospace, monospace; font-size: 0.75rem; padding: 0.5rem; border-radius: 4px; white-space: pre-wrap; }
+  .meta { font-size: 0.75rem; color: #888; margin-top: 0.25rem; }
+  .fw-badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: #e0e7ff; color: #3730a3; margin-bottom: 0.35rem; }
+  .git-info { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px dashed #ddd; font-size: 0.75rem; color: #444; }
+  .git-hash { font-family: ui-monospace, monospace; background: #eef; padding: 0 0.3rem; border-radius: 3px; }
+  .git-error { color: #a71d2a; }
+</style>
+</head>
+<body>
+  <h1>CI Deploy Agent</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Info</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="projects-body"></tbody>
+  </table>
+
+<script>
+async function fetchProjects() {
+  const res = await fetch("/api/projects");
+  const projects = await res.json();
+  render(projects);
+}
+
+function badgeClass(state) {
+  return "badge badge-" + state;
+}
+
+function render(projects) {
+  const body = document.getElementById("projects-body");
+  body.innerHTML = "";
+  for (const p of projects) {
+    const s = p.status;
+    const tr = document.createElement("tr");
+
+    const building = s.state === "building";
+    tr.innerHTML = `
+      <td><strong>${p.name}</strong></td>
+      <td>
+        <span class="fw-badge">${p.framework || "native"}</span>
+        <div class="path">source: ${p.sourceDir}</div>
+        <div class="path">branch: ${p.branch}</div>
+        <div class="path">dest: ${p.destDir}</div>
+        ${p.framework === "custom" ? `<div class="path">cmd: ${p.buildCommand}</div>` : ""}
+        ${renderGitInfo(p.git)}
+      </td>
+      <td>
+        <span class="${badgeClass(s.state)}">${s.state}</span>
+        <div class="meta">${s.buildNo ? "build #" + s.buildNo : ""} ${s.updatedAt ? "· " + s.updatedAt : ""}</div>
+        ${s.log ? `<div class="log">${escapeHtml(s.log)}</div>` : ""}
+      </td>
+      <td>
+        <button ${building ? "disabled" : ""} data-name="${p.name}">
+          ${building ? "Building..." : "Start build"}
+        </button>
+      </td>
+    `;
+    body.appendChild(tr);
+  }
+
+  body.querySelectorAll("button").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const name = btn.dataset.name;
+      btn.disabled = true;
+      btn.textContent = "Building...";
+      try {
+        await fetch(`/api/projects/${encodeURIComponent(name)}/build`, { method: "POST" });
+      } catch (e) {
+        console.error(e);
+      }
+      fetchProjects();
+    });
+  });
+}
+
+function renderGitInfo(git) {
+  if (!git) return "";
+  if (git.error) {
+    return `<div class="git-info git-error">git: ${escapeHtml(git.error)}</div>`;
+  }
+  return `
+    <div class="git-info">
+      <span class="git-hash">${git.commitHash}</span> ${escapeHtml(git.commitMessage || "")}<br/>
+      ${escapeHtml(git.commitAuthor || "")} · ${escapeHtml(git.commitDate || "")}
+    </div>
+  `;
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+fetchProjects();
+setInterval(fetchProjects, 8000);
+</script>
+</body>
+</html>

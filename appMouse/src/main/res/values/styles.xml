@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AppMouse" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/mouse_primary</item>
+        <item name="colorPrimaryDark">@color/mouse_primary_dark</item>
+        <item name="colorAccent">@color/mouse_accent</item>
+        <item name="android:windowBackground">@color/mouse_background</item>
+    </style>
+</resources>

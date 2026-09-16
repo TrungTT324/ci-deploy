@@ -1,0 +1,41 @@
+{
+  "version": "20",
+  "apps":[
+    {
+      "appName":"xSofts Application",
+      "description":"An application for all apps.",
+      "version":"1.0.0",
+      "build":"2024-10-10:16:20,001",
+      "env":"QA",
+      "fileUrl":"/xpos/...apk",
+      "notes":"Fix bugs , improvement UI"
+    },
+    {
+      "appName":"xPOs",
+      "description":"An application for POS sale.",
+      "version":"1.0.0",
+      "build":"2024-10-10:16:20,001",
+      "env":"QA",
+      "fileUrl":"http://172.16.100.187:8080/apps/xpos/xPos_QA_2024-Oct-08_1417_debug.apk",
+      "notes":"Fix bugs , improvement UI"
+    },
+    {
+      "appName":"XCheckin",
+      "description":"An application for POS sale. Use for Customer checkin",
+      "version":"1.0.0",
+      "build":"2024-10-10:16:20,001",
+      "env":"QA",
+      "fileUrl":"/xpos/...apk",
+      "notes":"Fix bugs , improvement UI"
+    },
+    {
+      "appName":"X-Signature",
+      "description":"An application play media",
+      "version":"1.0.0",
+      "build":"2024-10-10:16:20,001",
+      "env":"QA",
+      "fileUrl":"/xpos/...apk",
+      "notes":"Fix bugs , improvement UI"
+    }
+  ]
+}

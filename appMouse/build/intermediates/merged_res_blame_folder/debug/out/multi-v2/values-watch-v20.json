@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "hdisoft.app.mouse.appMouse-mergeDebugResources-34:/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "/Users/trungtruong/.gradle/caches/8.14/transforms/23bde3ac23d2e1390992a7f3de40cc43/transformed/appcompat-1.6.1/res/values-watch-v20/values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        }
+    ]
+}

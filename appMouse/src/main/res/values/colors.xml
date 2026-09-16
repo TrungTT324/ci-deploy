@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="mouse_primary">#2196F3</color>
+    <color name="mouse_primary_dark">#1976D2</color>
+    <color name="mouse_accent">#03A9F4</color>
+
+    <color name="mouse_background">#121212</color>
+    <color name="mouse_surface">#1E1E1E</color>
+    <color name="mouse_text">#FFFFFF</color>
+    <color name="mouse_hint">#9AA0A6</color>
+</resources>

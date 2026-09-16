@@ -5,4 +5,17 @@
 .DS_Store
 /build
 /app/build
+/appQa/build/
 *.apk
+
+# Signing keystores must never be committed (2026-09-15 key rotation, WorkItem
+# 5c928545 — the previous app/ci-deploy.jks was committed and is treated as
+# compromised). Provide release signing via env vars in CI or local.properties
+# for local dev; see app/build.gradle.kts.
+*.jks
+*.keystore
+
+agent-deploy/.venv/
+__pycache__/
+.last_deploy_choice
+desktop/.appchat_desktop_identity.json

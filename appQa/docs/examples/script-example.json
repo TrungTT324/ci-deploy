@@ -1,0 +1,44 @@
+[
+  {
+    "name": "open_app",
+    "displayName": "Open Calendar",
+    "description": "Open the Calendar application.",
+    "category": "core",
+    "input": {
+      "query": "Calendar"
+    },
+    "output": null
+  },
+  {
+    "name": "tap",
+    "displayName": "Tap calendar position",
+    "description": null,
+    "category": "core",
+    "input": {
+      "x": 102,
+      "y": 399
+    },
+    "output": null
+  },
+  {
+    "name": "wait",
+    "displayName": "Wait for UI",
+    "description": "Pause before capturing the screen.",
+    "category": "core",
+    "input": {
+      "duration": 1000
+    },
+    "output": null
+  },
+  {
+    "name": "capture",
+    "category": "core"
+  },
+  {
+    "name": "record",
+    "category": "core",
+    "input": {
+      "duration": 5000
+    }
+  }
+]

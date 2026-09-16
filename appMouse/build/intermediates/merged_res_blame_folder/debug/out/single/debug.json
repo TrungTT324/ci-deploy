@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/xml_file_paths.xml.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/xml/file_paths.xml"
+    },
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/layout_activity_main.xml.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/layout/activity_main.xml"
+    },
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/drawable_bg_touchpad.xml.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/drawable/bg_touchpad.xml"
+    },
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "hdisoft.app.mouse.appMouse-merged_res-36:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "hdisoft.app.mouse.appMouse-main-38:/mipmap-hdpi/ic_launcher.png"
+    }
+]

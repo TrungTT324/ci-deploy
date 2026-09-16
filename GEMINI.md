@@ -37,17 +37,4 @@ Tệp này cung cấp ngữ cảnh, cấu trúc và tiêu chuẩn phát triển 
 - **FileProvider:** Cấu hình đường dẫn cho phép chia sẻ tệp APK tải về tại `app/src/main/res/xml/file_paths.xml`.
 
 ---
-
-## ⚙️ Các lệnh phát triển
-- **Build APK Debug:** `./gradlew assembleDebug`
-- **Triển khai cục bộ:** Copy tệp APK đã build sang thư mục Nginx:
-  ```bash
-  cp app/build/outputs/apk/debug/app-debug.apk /opt/homebrew/var/www/apps/ci-deploy/CI-Deploy_debug.apk
-  ```
-- **File HTML Triển khai:** Cập nhật trang [/opt/homebrew/var/www/index.html](file:///opt/homebrew/var/www/index.html) để thêm liên kết tải về trực tiếp.
-
----
-
-## 🤖 Chỉ dẫn cho AI Assistant
-- Dự án này đã được **di chuyển hoàn toàn khỏi Flutter** sang Native Kotlin. Tuyệt đối không tạo lại hay sử dụng bất kỳ tệp tin hoặc lệnh nào liên quan tới Flutter (`lib/`, `pubspec.yaml`, `flutter build`, v.v.).
-- Toàn bộ tính năng tương tác mạng sử dụng Java/Kotlin HTTP chuẩn kết hợp với `kotlinx.coroutines` để tối ưu hóa hiệu suất ứng dụng.
+### 4. Mỗi lần thực hiện note lại trong file history.md

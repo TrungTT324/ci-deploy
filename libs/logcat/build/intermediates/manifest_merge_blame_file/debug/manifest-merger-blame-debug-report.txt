@@ -1,0 +1,39 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="hdisoft.app.logcat" >
+4
+5    <uses-sdk android:minSdkVersion="21" />
+6
+7    <application>
+7-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:3:5-19:19
+8        <activity
+8-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:4:9-8:54
+9            android:name="hdisoft.app.logcat.presentation.LogcatActivity"
+9-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:5:13-74
+10            android:configChanges="keyboardHidden"
+10-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:8:13-51
+11            android:exported="false"
+11-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:6:13-37
+12            android:theme="@style/LogcatTheme" />
+12-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:7:13-47
+13
+14        <service
+14-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:10:9-18:19
+15            android:name="hdisoft.app.logcat.presentation.LogStreamService"
+15-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:11:13-76
+16            android:enabled="true"
+16-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:12:13-35
+17            android:exported="false"
+17-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:13:13-37
+18            android:foregroundServiceType="specialUse" >
+18-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:14:13-55
+19            <property
+19-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:15:13-17:185
+20                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+20-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:16:17-76
+21                android:value="This service broadcasts real-time logcat of the app via WebSocket to local network clients or receives logs from local servers for debugging purpose." />
+21-->/Users/trungtruong/xsofts_prj/web/github/ci-deploy/libs/logcat/src/main/AndroidManifest.xml:17:17-182
+22        </service>
+23    </application>
+24
+25</manifest>
